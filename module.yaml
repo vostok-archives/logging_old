@@ -1,0 +1,21 @@
+default:
+  build:
+    target: Vostok.Logging.sln
+    configuration: Release
+    tool:
+      name: dotnet
+
+  install:
+    - Vostok.Logging/bin/Release/netstandard2.0/Vostok.Logging.dll
+    - module vostok.commons
+
+  deps:
+    - vostok.commons@dev
+
+notests *default:
+  build:
+    configuration: NoTests
+
+full-build:
+  build:
+    configuration: Release
