@@ -7,7 +7,7 @@ namespace Vostok.Logging
     {
         public void Main()
         {
-            var log = new FakeLog();
+            var log = new SilentLog();
 
             log.Info(
                 "Hello from {application}!",

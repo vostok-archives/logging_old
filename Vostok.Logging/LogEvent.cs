@@ -7,20 +7,22 @@ namespace Vostok.Logging
     {
         public LogLevel Level { get; }
 
-        public DateTime Timestamp { get; } // TODO(krait): DateTimeOffset
+        public DateTimeOffset Timestamp { get; }
 
         public string MessageTemplate { get; }
 
         public IReadOnlyDictionary<string, object> Properties { get; }
 
         // TODO(krait): Exception
+        public Exception Exception { get; }
 
-        public LogEvent(LogLevel level, string messageTemplate, IDictionary<string, object> properties, DateTime timestamp)
+        public LogEvent(LogLevel level, string messageTemplate, IReadOnlyDictionary<string, object> properties, Exception exception)
         {
             Level = level;
             MessageTemplate = messageTemplate;
-            Properties = null;//properties;
-            Timestamp = timestamp;
+            Properties = properties;
+            Timestamp = DateTimeOffset.Now;
+            Exception = exception;
         }
     }
 }
