@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Vostok.Logging.Logs
 {
@@ -8,10 +9,10 @@ namespace Vostok.Logging.Logs
         {
             lock (syncLock)
             {
-                var oldColor = Console.ForegroundColor;
-                //Console.ForegroundColor = levelToColor[logEvent.Level];
-                //Console.Out.Write(LogEventFormatter.Format(logEvent));
-                //Console.ForegroundColor = oldColor;
+                using (new ConsoleColorChanger(levelToColor[@event.Level]))
+                {
+                    Console.Out.Write(LogEventFormatter.Format(@event));
+                }
             }
         }
 
@@ -21,5 +22,14 @@ namespace Vostok.Logging.Logs
         }
 
         private static readonly object syncLock = new object();
+
+        private static readonly Dictionary<LogLevel, ConsoleColor> levelToColor = new Dictionary<LogLevel, ConsoleColor>
+        {
+            {LogLevel.Debug, ConsoleColor.Gray},
+            {LogLevel.Info, ConsoleColor.White},
+            {LogLevel.Warn, ConsoleColor.Yellow},
+            {LogLevel.Error, ConsoleColor.Red},
+            {LogLevel.Fatal, ConsoleColor.Red}
+        };
     }
 }

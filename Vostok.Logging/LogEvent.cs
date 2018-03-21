@@ -19,7 +19,7 @@ namespace Vostok.Logging
         {
             Level = level;
             Timestamp = DateTimeOffset.Now;
-            MessageTemplate = messageTemplate;
+            MessageTemplate = messageTemplate ?? string.Empty;
             Properties = properties;
             Exception = exception;
         }
