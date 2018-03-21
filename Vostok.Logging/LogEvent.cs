@@ -13,15 +13,14 @@ namespace Vostok.Logging
 
         public IReadOnlyDictionary<string, object> Properties { get; }
 
-        // TODO(krait): Exception
         public Exception Exception { get; }
 
-        public LogEvent(LogLevel level, string messageTemplate, IReadOnlyDictionary<string, object> properties, Exception exception)
+        public LogEvent(LogLevel level, string messageTemplate, IReadOnlyDictionary<string, object> properties = null, Exception exception = null)
         {
             Level = level;
+            Timestamp = DateTimeOffset.Now;
             MessageTemplate = messageTemplate;
             Properties = properties;
-            Timestamp = DateTimeOffset.Now;
             Exception = exception;
         }
     }
