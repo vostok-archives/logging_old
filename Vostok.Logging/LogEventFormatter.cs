@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Vostok.Logging
@@ -15,6 +14,9 @@ namespace Vostok.Logging
 
         public static string FormatMessage(string messageTemplate, IReadOnlyDictionary<string, object> properties)
         {
+            if (messageTemplate == null || properties == null)
+                return null;
+
             var message = new StringBuilder();
             for (var i = 0; i < messageTemplate.Length; i++)
             {
@@ -28,18 +30,23 @@ namespace Vostok.Logging
                         if (token != null)
                         {
                             message.Append(token);
-                            i += token.Length;
                         }
                     }
                     else
                     {
                         var propertyName = token.ToString(1, token.Length - 2);
-                        if (string.IsNullOrWhiteSpace(propertyName) && properties.ContainsKey(propertyName))
+                        if (!string.IsNullOrWhiteSpace(propertyName) && properties.ContainsKey(propertyName))
                         {
                             var property = properties[propertyName];
                             message.Append(property);
                         }
+                        else
+                        {
+                            message.Append(token);
+                        }
                     }
+
+                    i += token?.Length - 1 ?? 0;
                 }
             }
             return message.ToString();
@@ -47,7 +54,7 @@ namespace Vostok.Logging
 
         public static bool TryGetTokenFrom(string messageTemplate, int startIndex, out StringBuilder token)
         {
-            if (startIndex < 0 || startIndex >= messageTemplate.Length)
+            if (startIndex < 0 || startIndex > messageTemplate.Length - 1)
             {
                 token = null;
                 return false;
