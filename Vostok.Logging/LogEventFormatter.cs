@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Vostok.Logging
@@ -13,70 +14,104 @@ namespace Vostok.Logging
             return $"{@event.Timestamp:HH:mm:ss.fff} {@event.Level} {message} {@event.Exception}{Environment.NewLine}";
         }
 
-        public static string FormatMessage(string messageTemplate, IReadOnlyDictionary<string, object> properties)
+        // TODO(krait): Probably contains bugs. More tests are required.
+        public static string FormatMessage(string template, IReadOnlyDictionary<string, object> properties)
         {
-            if (messageTemplate == null || properties == null)
-                return null;
+            if (template == null)
+                throw new ArgumentNullException(nameof(template));
+            if (properties == null)
+                throw new ArgumentNullException(nameof(properties));
 
-            var message = new StringBuilder();
-            for (var i = 0; i < messageTemplate.Length; i++)
+            var partBuffer = new StringBuffer(template.Length);
+            var resultBuilder = new StringBuilder(template.Length * 3);
+
+            var inKey = false;
+            for (var i = 0; i < template.Length; i++)
             {
-                var currentChar = messageTemplate[i];
-                if (!currentChar.Equals('{'))
-                    message.Append(currentChar);
-                else
+                var currentChar = template[i];
+                if (currentChar == '{')
                 {
-                    if (!TryGetTokenFrom(messageTemplate, i, out var token))
+                    if (inKey)
+                        resultBuilder.Append('{');
+                    if (inKey && partBuffer.IsEmpty)
                     {
-                        if (token != null)
-                        {
-                            message.Append(token);
-                        }
+                        resultBuilder.Append('{');
+                        inKey = false;
                     }
                     else
                     {
-                        var propertyName = token.ToString(1, token.Length - 2);
-                        if (!string.IsNullOrWhiteSpace(propertyName) && properties.ContainsKey(propertyName))
-                        {
-                            var property = properties[propertyName];
-                            message.Append(property);
-                        }
-                        else
-                        {
-                            message.Append(token);
-                        }
+                        inKey = true;
+                        partBuffer.MoveToBuilder(resultBuilder);
                     }
-
-                    i += token?.Length - 1 ?? 0;
+                    continue;
                 }
+
+                if (currentChar == '}' && inKey)
+                {
+                    var key = partBuffer.MoveToString();
+                    if (properties.TryGetValue(key, out var value))
+                        resultBuilder.Append(value);
+                    else
+                        resultBuilder.Append('{').Append(key).Append('}');
+
+                    inKey = false;
+                    continue;
+                }
+
+                partBuffer.Add(currentChar);
             }
-            return message.ToString();
+
+            if (inKey)
+                resultBuilder.Append('{');
+            if (!partBuffer.IsEmpty)
+                partBuffer.MoveToBuilder(resultBuilder);
+
+            return resultBuilder.ToString();
         }
 
-        public static bool TryGetTokenFrom(string messageTemplate, int startIndex, out StringBuilder token)
+        private struct StringBuffer
         {
-            if (startIndex < 0 || startIndex > messageTemplate.Length - 1)
+            public StringBuffer(int length)
             {
-                token = null;
-                return false;
+                index = 0;
+                chars = new char[length];
             }
 
-            token = new StringBuilder().Append(messageTemplate[startIndex]);
-
-            if (!token[0].Equals('{'))
-                return false;
-
-            for (var i = startIndex + 1; i < messageTemplate.Length; i++)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void MoveToBuilder(StringBuilder builder)
             {
-                var currentChar = messageTemplate[i];
-                if (currentChar.Equals('{'))
-                    return false;
-                token.Append(currentChar);
-                if (currentChar.Equals('}'))
-                    return true;
+                if (index == 0)
+                    return;
+
+                builder.Append(chars, 0, index);
+                index = 0;
             }
 
-            return false;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public string MoveToString()
+            {
+                if (index == 0)
+                    return "";
+
+                var value = new string(chars, 0, index);
+                index = 0;
+                return value;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Add(char c)
+            {
+                chars[index++] = c;
+            }
+
+            public bool IsEmpty
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get { return index == 0; }
+            }
+
+            private int index;
+            private readonly char[] chars;
         }
     }
 }

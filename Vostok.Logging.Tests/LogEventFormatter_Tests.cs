@@ -8,7 +8,7 @@ namespace Vostok.Logging.Tests
     [TestFixture]
     internal class LogEventFormatter_Tests
     {
-        [Test]
+        /*[Test]
         public void TryGetTokenFrom_should_return_false_for_negative_index_value()
         {
             LogEventFormatter.TryGetTokenFrom(Template, -1, out var token).Should().BeFalse();
@@ -48,7 +48,7 @@ namespace Vostok.Logging.Tests
         {
             LogEventFormatter.TryGetTokenFrom(Template, 7, out var token).Should().BeFalse();
             token.ToString().Should().BeEquivalentTo("{a");
-        }
+        }*/
 
         [Test]
         public void FormatMessage_should_replace_placeholder_if_needed_property_exists()
@@ -78,6 +78,7 @@ namespace Vostok.Logging.Tests
             LogEventFormatter.FormatMessage(TemplateWithProp, properties).Should().BeEquivalentTo("ab{cd{prop}r}gt}tr{gty{");
         }
 
+        // CR(krait): Why?
         [Test]
         public void FormatMessage_should_not_replace_placeholder_for_empty_property_name()
         {
@@ -85,6 +86,7 @@ namespace Vostok.Logging.Tests
             LogEventFormatter.FormatMessage(TemplateWithEmptyProp, properties).Should().BeEquivalentTo("ab{cd{}r}gt}tr{gty{");
         }
 
+        // CR(krait): Why?
         [Test]
         public void FormatMessage_should_not_replace_placeholder_for_whitespace_property_name()
         {
@@ -92,6 +94,7 @@ namespace Vostok.Logging.Tests
             LogEventFormatter.FormatMessage(TemplateWithWhitespaceProp, properties).Should().BeEquivalentTo("ab{cd{ }r}gt}tr{gty{");
         }
 
+        // CR(krait): Why? It seems sane to throw an ArgumentNullException.
         [Test]
         public void FormatMessage_should_return_null_for_null_template()
         {
@@ -99,11 +102,14 @@ namespace Vostok.Logging.Tests
             LogEventFormatter.FormatMessage(null, properties).Should().BeNull();
         }
 
+        // CR(krait): Why? It seems sane to throw an ArgumentNullException.
         [Test]
         public void FormatMessage_should_return_null_for_null_properties()
         {
             LogEventFormatter.FormatMessage(TemplateWithProp, null).Should().BeNull();
         }
+
+        // CR(krait): Need tests for more corner cases.
 
         // CR(krait): Need tests for { and } escaping. E.g. that "{{0}}" is not substituted. 
 
