@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Vostok.Logging.Logs
 {
+    // CR(krait): This one should become asynchronous.
     public class ConsoleLog : ILog
     {
         public void Log(LogEvent @event)

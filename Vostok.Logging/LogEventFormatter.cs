@@ -4,8 +4,9 @@ using System.Text;
 
 namespace Vostok.Logging
 {
-    public  static class LogEventFormatter
+    public static class LogEventFormatter
     {
+        // CR(krait): This format is only applicable for ConsoleLog. Would be better to move the method there.
         public static string Format(LogEvent @event)
         {
             var message = FormatMessage(@event.MessageTemplate, @event.Properties);

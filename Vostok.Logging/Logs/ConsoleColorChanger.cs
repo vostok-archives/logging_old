@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Vostok.Logging
+namespace Vostok.Logging.Logs
 {
     internal class ConsoleColorChanger : IDisposable
     {

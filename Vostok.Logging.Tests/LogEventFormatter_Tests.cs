@@ -105,6 +105,8 @@ namespace Vostok.Logging.Tests
             LogEventFormatter.FormatMessage(TemplateWithProp, null).Should().BeNull();
         }
 
+        // CR(krait): Need tests for { and } escaping. E.g. that "{{0}}" is not substituted. 
+
         private const string Template = "a{a}a{a{a";
         private const string TemplateWithProp = "ab{cd{prop}r}gt}tr{gty{";
         private const string TemplateWithEmptyProp = "ab{cd{}r}gt}tr{gty{";
