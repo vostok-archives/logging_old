@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -7,20 +6,11 @@ namespace Vostok.Logging
 {
     public static class LogEventFormatter
     {
-        // CR(krait): This format is only applicable for ConsoleLog. Would be better to move the method there.
-        public static string Format(LogEvent @event)
-        {
-            var message = FormatMessage(@event.MessageTemplate, @event.Properties);
-            return $"{@event.Timestamp:HH:mm:ss.fff} {@event.Level} {message} {@event.Exception}{Environment.NewLine}";
-        }
-
         // TODO(krait): Probably contains bugs. More tests are required.
         public static string FormatMessage(string template, IReadOnlyDictionary<string, object> properties)
         {
-            if (template == null)
-                throw new ArgumentNullException(nameof(template));
-            if (properties == null)
-                throw new ArgumentNullException(nameof(properties));
+            if (template == null || properties == null)
+                return null;
 
             var partBuffer = new StringBuffer(template.Length);
             var resultBuilder = new StringBuilder(template.Length * 3);

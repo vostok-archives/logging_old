@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Vostok.Logging.Logs
 {
@@ -8,21 +9,46 @@ namespace Vostok.Logging.Logs
     {
         public void Log(LogEvent @event)
         {
-            lock (syncLock)
+            if(@event == null)
+                return;
+
+            eventsQueue.Enqueue(@event);
+        }
+
+        public bool IsEnabledFor(LogLevel level) => true;
+
+        private static void WriteEventsToConsole()
+        {
+            for (var i = 0; i < EventsToWriteForIteration; i++)
             {
-                using (new ConsoleColorChanger(levelToColor[@event.Level]))
+                if (!eventsQueue.TryDequeue(out var currentEvent))
                 {
-                    Console.Out.Write(LogEventFormatter.Format(@event));
+                    break;
+                }
+
+                using (new ConsoleColorChanger(levelToColor[currentEvent.Level]))
+                {
+                    Console.Out.Write(FormatEvent(currentEvent));
                 }
             }
         }
 
-        public bool IsEnabledFor(LogLevel level)
+        private static string FormatEvent(LogEvent @event)
         {
-            throw new System.NotImplementedException();
+            var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
+            return $"{@event.Timestamp:HH:mm:ss.fff} {@event.Level} {message} {@event.Exception}{Environment.NewLine}";
         }
 
-        private static readonly object syncLock = new object();
+        private static Thread StartNewLoggingThread()
+        {
+            var thread = new Thread(WriteEventsToConsole);
+            thread.Start();
+            return thread;
+        }
+
+        private static readonly Thread logThread = StartNewLoggingThread();
+
+        private static readonly CycledQueue<LogEvent> eventsQueue = new CycledQueue<LogEvent>(QueueCapacity);
 
         private static readonly Dictionary<LogLevel, ConsoleColor> levelToColor = new Dictionary<LogLevel, ConsoleColor>
         {
@@ -32,5 +58,8 @@ namespace Vostok.Logging.Logs
             {LogLevel.Error, ConsoleColor.Red},
             {LogLevel.Fatal, ConsoleColor.Red}
         };
+
+        private const int QueueCapacity = 10000;
+        private const int EventsToWriteForIteration = 1000;
     }
 }

@@ -8,48 +8,6 @@ namespace Vostok.Logging.Tests
     [TestFixture]
     internal class LogEventFormatter_Tests
     {
-        /*[Test]
-        public void TryGetTokenFrom_should_return_false_for_negative_index_value()
-        {
-            LogEventFormatter.TryGetTokenFrom(Template, -1, out var token).Should().BeFalse();
-            token.Should().BeNull();
-        }
-
-        [Test]
-        public void TryGetTokenFrom_should_return_false_for_very_large_index_value()
-        {
-            LogEventFormatter.TryGetTokenFrom(Template, 100, out var token).Should().BeFalse();
-            token.Should().BeNull();
-        }
-
-        [Test]
-        public void TryGetTokenFrom_should_return_false_if_first_symbol_is_not_left_brace()
-        {
-            LogEventFormatter.TryGetTokenFrom(Template, 0, out var token).Should().BeFalse();
-            token.ToString().Should().BeEquivalentTo("a");
-        }
-
-        [Test]
-        public void TryGetTokenFrom_should_return_true_if_correct_token_was_found()
-        {
-            LogEventFormatter.TryGetTokenFrom(Template, 1, out var token).Should().BeTrue();
-            token.ToString().Should().BeEquivalentTo("{a}");
-        }
-
-        [Test]
-        public void TryGetTokenFrom_should_return_false_if_second_left_brace_was_found()
-        {
-            LogEventFormatter.TryGetTokenFrom(Template, 5, out var token).Should().BeFalse();
-            token.ToString().Should().BeEquivalentTo("{a");
-        }
-
-        [Test]
-        public void TryGetTokenFrom_should_return_false_if_right_brace_was_not_found()
-        {
-            LogEventFormatter.TryGetTokenFrom(Template, 7, out var token).Should().BeFalse();
-            token.ToString().Should().BeEquivalentTo("{a");
-        }*/
-
         [Test]
         public void FormatMessage_should_replace_placeholder_if_needed_property_exists()
         {
@@ -117,5 +75,8 @@ namespace Vostok.Logging.Tests
         private const string TemplateWithProp = "ab{cd{prop}r}gt}tr{gty{";
         private const string TemplateWithEmptyProp = "ab{cd{}r}gt}tr{gty{";
         private const string TemplateWithWhitespaceProp = "ab{cd{ }r}gt}tr{gty{";
+
+
+        private const string Template2 = "{0}_{1}"; //veryveryveryverybig_string
     }
 }
