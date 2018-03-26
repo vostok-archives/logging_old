@@ -9,74 +9,162 @@ namespace Vostok.Logging.Tests
     internal class LogEventFormatter_Tests
     {
         [Test]
-        public void FormatMessage_should_replace_placeholder_if_needed_property_exists()
+        public void FormatMessage_should_replace_placeholder_if_such_key_exists_in_props()
         {
-            var properties = new Dictionary<string, object> {{"prop", "hello"}};
-            LogEventFormatter.FormatMessage(TemplateWithProp, properties).Should().BeEquivalentTo("ab{cdhellor}gt}tr{gty{");
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{prop}bb", properties).Should().BeEquivalentTo("aavaluebb");
         }
 
         [Test]
-        public void FormatMessage_should_not_replace_placeholder_if_properties_are_not_case_ignored()
+        public void FormatMessage_should_replace_placeholder_if_template_starts_with_it()
         {
-            var properties = new Dictionary<string, object> { { "ProP", "hello" } };
-            LogEventFormatter.FormatMessage(TemplateWithProp, properties).Should().BeEquivalentTo("ab{cd{prop}r}gt}tr{gty{");
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("{prop}bb", properties).Should().BeEquivalentTo("valuebb");
         }
 
         [Test]
-        public void FormatMessage_should_replace_placeholder_if_properties_are_case_ignored()
+        public void FormatMessage_should_replace_placeholder_if_template_ends_with_it()
         {
-            var properties = new Dictionary<string, object>(StringComparer.CurrentCultureIgnoreCase) { { "ProP", "hello" } };
-            LogEventFormatter.FormatMessage(TemplateWithProp, properties).Should().BeEquivalentTo("ab{cdhellor}gt}tr{gty{");
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{prop}", properties).Should().BeEquivalentTo("aavalue");
         }
 
         [Test]
-        public void FormatMessage_should_not_replace_placeholder_if_needed_property_is_absent()
+        public void FormatMessage_should_not_replace_placeholder_with_doubled_braces()
         {
-            var properties = new Dictionary<string, object> { { "otherProp", "hello" } };
-            LogEventFormatter.FormatMessage(TemplateWithProp, properties).Should().BeEquivalentTo("ab{cd{prop}r}gt}tr{gty{");
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{{prop}}bb", properties).Should().BeEquivalentTo("aa{prop}bb");
         }
 
-        // CR(krait): Why?
         [Test]
-        public void FormatMessage_should_not_replace_placeholder_for_empty_property_name()
+        public void FormatMessage_should_not_replace_placeholder_with_doubled_braces_if_template_starts_with_it()
         {
-            var properties = new Dictionary<string, object> { { "", "hello" } };
-            LogEventFormatter.FormatMessage(TemplateWithEmptyProp, properties).Should().BeEquivalentTo("ab{cd{}r}gt}tr{gty{");
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("{{prop}}bb", properties).Should().BeEquivalentTo("{prop}bb");
         }
 
-        // CR(krait): Why?
         [Test]
-        public void FormatMessage_should_not_replace_placeholder_for_whitespace_property_name()
+        public void FormatMessage_should_not_replace_placeholder_with_doubled_braces_if_template_ends_with_it()
         {
-            var properties = new Dictionary<string, object> { { " ", "hello" } };
-            LogEventFormatter.FormatMessage(TemplateWithWhitespaceProp, properties).Should().BeEquivalentTo("ab{cd{ }r}gt}tr{gty{");
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{{prop}}", properties).Should().BeEquivalentTo("aa{prop}");
         }
 
-        // CR(krait): Why? It seems sane to throw an ArgumentNullException.
+        [Test]
+        public void FormatMessage_should_not_replace_placeholder_if_left_brace_is_doubled()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{{prop}bb", properties).Should().BeEquivalentTo("aa{{prop}bb");
+        }
+
+        [Test]
+        public void FormatMessage_should_not_replace_placeholder_if_right_brace_is_doubled()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{prop}}bb", properties).Should().BeEquivalentTo("aa{prop}}bb");
+        }
+
+        [Test]
+        public void FormatMessage_should_replace_placeholder_with_tripled_braces()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("{{{prop}}}", properties).Should().BeEquivalentTo("{value}");
+        }
+
+        [Test]
+        public void FormatMessage_should_not_replace_placeholder_without_right_brace()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{prop", properties).Should().BeEquivalentTo("aa{prop");
+        }
+
+        [Test]
+        public void FormatMessage_should_not_replace_placeholder_without_right_brace_if_template_starts_with_it()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("{prop", properties).Should().BeEquivalentTo("{prop");
+        }
+
+        [Test]
+        public void FormatMessage_should_not_replace_placeholder_without_left_brace()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("prop}bb", properties).Should().BeEquivalentTo("prop}bb");
+        }
+
+        [Test]
+        public void FormatMessage_should_not_replace_placeholder_without_left_brace_if_template_ends_with_it()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("prop}", properties).Should().BeEquivalentTo("prop}");
+        }
+
+        [Test]
+        public void FormatMessage_should_replace_only_deepest_placeholders()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{bb{prop}cc}dd", properties).Should().BeEquivalentTo("aa{bbvaluecc}dd");
+        }
+
+        [Test]
+        public void FormatMessage_should_not_replace_placeholder_if_such_key_not_exists_in_props()
+        {
+            var properties = new Dictionary<string, object> { { "other", "value" } };
+            LogEventFormatter.FormatMessage("aa{prop}bb", properties).Should().BeEquivalentTo("aa{prop}bb");
+        }
+
+        [Test]
+        public void FormatMessage_should_not_use_ignore_case_if_props_are_not_ignorecased()
+        {
+            var properties = new Dictionary<string, object> { { "Prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{prop}bb", properties).Should().BeEquivalentTo("aa{prop}bb");
+        }
+
+        [Test]
+        public void FormatMessage_should_use_ignore_case_if_props_are_ignorecased()
+        {
+            var properties = new Dictionary<string, object>(StringComparer.CurrentCultureIgnoreCase) { { "Prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{prop}bb", properties).Should().BeEquivalentTo("aavaluebb");
+        }
+
+        [Test]
+        public void FormatMessage_should_replace_two_placeholders()
+        {
+            var properties = new Dictionary<string, object> { { "prop1", "value1" }, { "prop2", "value2" } };
+            LogEventFormatter.FormatMessage("aa{prop1}bb{prop2}cc", properties).Should().BeEquivalentTo("aavalue1bbvalue2cc");
+        }
+
+        [Test]
+        public void FormatMessage_should_replace_two_placeholders_if_they_have_not_separators_between_them()
+        {
+            var properties = new Dictionary<string, object> { { "prop1", "value1" }, { "prop2", "value2" } };
+            LogEventFormatter.FormatMessage("{prop1}{prop2}", properties).Should().BeEquivalentTo("value1value2");
+        }
+
+        [Test]
+        public void FormatMessage_should_replace_empty_placeholders_if_such_key_exists_in_props()
+        {
+            var properties = new Dictionary<string, object> { { "", "value" } };
+            LogEventFormatter.FormatMessage("aa{}bb", properties).Should().BeEquivalentTo("aavaluebb");
+        }
+
+        [Test]
+        public void FormatMessage_should_replace_whitespace_placeholders_if_such_key_exists_in_props()
+        {
+            var properties = new Dictionary<string, object> { { " ", "value" } };
+            LogEventFormatter.FormatMessage("aa{ }bb", properties).Should().BeEquivalentTo("aavaluebb");
+        }
+
         [Test]
         public void FormatMessage_should_return_null_for_null_template()
         {
-            var properties = new Dictionary<string, object> { { " ", "hello" } };
-            LogEventFormatter.FormatMessage(null, properties).Should().BeNull();
+            LogEventFormatter.FormatMessage(null, new Dictionary<string, object>()).Should().BeNull();
         }
 
-        // CR(krait): Why? It seems sane to throw an ArgumentNullException.
         [Test]
-        public void FormatMessage_should_return_null_for_null_properties()
+        public void FormatMessage_should_return_template_for_null_properties()
         {
-            LogEventFormatter.FormatMessage(TemplateWithProp, null).Should().BeNull();
+            LogEventFormatter.FormatMessage("aa{prop}bb", null).Should().BeEquivalentTo("aa{prop}bb");
         }
-
-        // CR(krait): Need tests for more corner cases.
-
-        // CR(krait): Need tests for { and } escaping. E.g. that "{{0}}" is not substituted. 
-
-        private const string Template = "a{a}a{a{a";
-        private const string TemplateWithProp = "ab{cd{prop}r}gt}tr{gty{";
-        private const string TemplateWithEmptyProp = "ab{cd{}r}gt}tr{gty{";
-        private const string TemplateWithWhitespaceProp = "ab{cd{ }r}gt}tr{gty{";
-
-
-        private const string Template2 = "{0}_{1}"; //veryveryveryverybig_string
     }
 }

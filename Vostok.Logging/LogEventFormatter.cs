@@ -9,8 +9,11 @@ namespace Vostok.Logging
         // TODO(krait): Probably contains bugs. More tests are required.
         public static string FormatMessage(string template, IReadOnlyDictionary<string, object> properties)
         {
-            if (template == null || properties == null)
+            if (template == null)
                 return null;
+
+            if (properties == null)
+                return template;
 
             var partBuffer = new StringBuffer(template.Length);
             var resultBuilder = new StringBuilder(template.Length * 3);
