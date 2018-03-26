@@ -4,9 +4,13 @@ using System.Threading;
 
 namespace Vostok.Logging.Logs
 {
-    // CR(krait): This one should become asynchronous.
     public class ConsoleLog : ILog
     {
+        static ConsoleLog()
+        {
+            StartNewLoggingThread();
+        }
+
         public void Log(LogEvent @event)
         {
             if(@event == null)
@@ -16,6 +20,25 @@ namespace Vostok.Logging.Logs
         }
 
         public bool IsEnabledFor(LogLevel level) => true;
+
+        private static void StartNewLoggingThread()
+        {
+            var thread = new Thread(() =>
+                {
+                    while (true)
+                    {
+                        try
+                        {
+                            WriteEventsToConsole();
+                        }
+                        catch (Exception)
+                        {
+                            Thread.Sleep(300);
+                        }
+                    }
+                });
+            thread.Start();
+        }
 
         private static void WriteEventsToConsole()
         {
@@ -38,15 +61,6 @@ namespace Vostok.Logging.Logs
             var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
             return $"{@event.Timestamp:HH:mm:ss.fff} {@event.Level} {message} {@event.Exception}{Environment.NewLine}";
         }
-
-        private static Thread StartNewLoggingThread()
-        {
-            var thread = new Thread(WriteEventsToConsole);
-            thread.Start();
-            return thread;
-        }
-
-        private static readonly Thread logThread = StartNewLoggingThread();
 
         private static readonly CycledQueue<LogEvent> eventsQueue = new CycledQueue<LogEvent>(QueueCapacity);
 
