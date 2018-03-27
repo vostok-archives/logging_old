@@ -16,7 +16,7 @@ namespace Vostok.Logging.Logs
             if(@event == null)
                 return;
 
-            eventsQueue.Enqueue(@event);
+            eventsBuffer.TryAdd(@event);
         }
 
         public bool IsEnabledFor(LogLevel level) => true;
@@ -42,12 +42,11 @@ namespace Vostok.Logging.Logs
 
         private static void WriteEventsToConsole()
         {
-            for (var i = 0; i < EventsToWriteForIteration; i++)
+            eventsBuffer.Drain(ref currentEvents, 0, currentEvents.Length);
+            foreach (var currentEvent in currentEvents)
             {
-                if (!eventsQueue.TryDequeue(out var currentEvent))
-                {
+                if(currentEvent == null)
                     break;
-                }
 
                 using (new ConsoleColorChanger(levelToColor[currentEvent.Level]))
                 {
@@ -62,7 +61,8 @@ namespace Vostok.Logging.Logs
             return $"{@event.Timestamp:HH:mm:ss.fff} {@event.Level} {message} {@event.Exception}{Environment.NewLine}";
         }
 
-        private static readonly CycledQueue<LogEvent> eventsQueue = new CycledQueue<LogEvent>(QueueCapacity);
+        private static LogEvent[] currentEvents = new LogEvent[Capacity];
+        private static readonly BoundedBuffer<LogEvent> eventsBuffer = new BoundedBuffer<LogEvent>(Capacity);
 
         private static readonly Dictionary<LogLevel, ConsoleColor> levelToColor = new Dictionary<LogLevel, ConsoleColor>
         {
@@ -73,7 +73,6 @@ namespace Vostok.Logging.Logs
             {LogLevel.Fatal, ConsoleColor.Red}
         };
 
-        private const int QueueCapacity = 10000;
-        private const int EventsToWriteForIteration = 1000;
+        private const int Capacity = 10000;
     }
 }

@@ -72,6 +72,20 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
+        public void FormatMessage_should_not_replace_placeholder_with_inverted_braces()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa}prop{bb", properties).Should().BeEquivalentTo("aa}prop{bb");
+        }
+
+        [Test]
+        public void FormatMessage_should_not_replace_placeholder_with_inverted_braces_if_template_starts_and_ends_with_it()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("}prop{", properties).Should().BeEquivalentTo("}prop{");
+        }
+
+        [Test]
         public void FormatMessage_should_not_replace_placeholder_without_right_brace()
         {
             var properties = new Dictionary<string, object> { { "prop", "value" } };
@@ -104,6 +118,20 @@ namespace Vostok.Logging.Tests
         {
             var properties = new Dictionary<string, object> { { "prop", "value" } };
             LogEventFormatter.FormatMessage("aa{bb{prop}cc}dd", properties).Should().BeEquivalentTo("aa{bbvaluecc}dd");
+        }
+
+        [Test]
+        public void FormatMessage_should_replace_placeholder_after_left_brace_when_separator_between_them_exists()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{bb{prop}cc", properties).Should().BeEquivalentTo("aa{bbvaluecc");
+        }
+
+        [Test]
+        public void FormatMessage_should_replace_placeholder_before_right_brace_when_separator_between_them_exists()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("bb{prop}cc}dd", properties).Should().BeEquivalentTo("bbvaluecc}dd");
         }
 
         [Test]
@@ -153,6 +181,13 @@ namespace Vostok.Logging.Tests
         {
             var properties = new Dictionary<string, object> { { " ", "value" } };
             LogEventFormatter.FormatMessage("aa{ }bb", properties).Should().BeEquivalentTo("aavaluebb");
+        }
+
+        [Test]
+        public void FormatMessage_should_replace_placeholders_named_like_parameters()
+        {
+            var properties = new Dictionary<string, object> { { "0", "value1" }, { "1", "value2" } };
+            LogEventFormatter.FormatMessage("aa{0}bb{1}cc", properties).Should().BeEquivalentTo("aavalue1bbvalue2cc");
         }
 
         [Test]
