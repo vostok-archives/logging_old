@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
@@ -21,27 +22,38 @@ namespace Vostok.Logging.Tests
             for (var i = 0; i < Capacity; i++)
                 buffer.TryAdd(i.ToString());
 
-            buffer.TryAdd("x").Should().BeFalse();
+            buffer.TryAdd(Capacity.ToString()).Should().BeFalse();
         }
 
         [Test]
         public void Drain_should_return_empty_array_when_buffer_is_empty()
         {
-            buffer.Drain(ref drainResult, 0, drainResult.Length);
+            buffer.Drain(drainResult, 0, drainResult.Length);
             drainResult.Should().Equal(Enumerable.Repeat((string) null, Capacity));
         }
 
+        [TestCase(1, Capacity)]
+        [TestCase(Capacity, 1)]
+        public void Drain_should_return_correct_result(int addCount, int drainCount)
+        {
+            for (var i = 0; i < addCount; i++)
+                buffer.TryAdd(i.ToString());
+
+            buffer.Drain(drainResult, 0, drainCount);
+
+            drainResult.Should().Equal(GenerateCorrectDrainResult(Math.Min(drainCount, addCount)));
+        }
+
         [TestCase(1)]
-        [TestCase(Capacity - 1)]
         [TestCase(Capacity)]
-        public void Drain_should_return_correct_result_and_remove_items_from_buffer(int count)
+        public void Drain_should_remove_items_from_buffer(int count)
         {
             for (var i = 0; i < count; i++)
                 buffer.TryAdd(i.ToString());
 
-            buffer.Drain(ref drainResult, 0, drainResult.Length);
-            drainResult.Should().Equal(Enumerable.Range(0, count).Select(i => i.ToString()));
-            buffer.Drain(ref drainResult, 0, drainResult.Length);
+            buffer.Drain(new string[Capacity], 0, Capacity);
+            buffer.Drain(drainResult, 0, drainResult.Length);
+
             drainResult.Should().Equal(Enumerable.Repeat((string)null, Capacity));
         }
 
@@ -51,7 +63,7 @@ namespace Vostok.Logging.Tests
             for (var i = 0; i < Capacity; i++)
                 buffer.TryAdd(i.ToString()).Should().BeTrue();
 
-            buffer.Drain(ref drainResult, 0, drainResult.Length);
+            buffer.Drain(drainResult, 0, drainResult.Length);
 
             for (var i = 0; i < Capacity; i++)
                 buffer.TryAdd(i.ToString()).Should().BeTrue();
@@ -62,7 +74,7 @@ namespace Vostok.Logging.Tests
         {
             var random = new Random();
 
-            for (var i = 0; i < 10*1000; i++)
+            for (var i = 0; i < 10 * 1000; i++)
             {
                 var count = random.Next(Capacity + 1);
 
@@ -71,9 +83,16 @@ namespace Vostok.Logging.Tests
                     buffer.TryAdd(j.ToString()).Should().BeTrue();
                 }
 
-                buffer.Drain(ref drainResult, 0, drainResult.Length);
-                drainResult.Should().Equal(Enumerable.Range(0, count).Select(j => j.ToString()));
+                drainResult = new string[Capacity];
+                buffer.Drain(drainResult, 0, drainResult.Length);
+                drainResult.Should().Equal(GenerateCorrectDrainResult(count));
             }
+        }
+
+        private IEnumerable<string> GenerateCorrectDrainResult(int count)
+        {
+            count = Math.Min(count, drainResult.Length);
+            return Enumerable.Range(0, count).Select(j => j.ToString()).Concat(Enumerable.Repeat((string) null, drainResult.Length - count));
         }
 
         [SetUp]

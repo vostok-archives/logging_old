@@ -35,7 +35,7 @@ namespace Vostok.Logging
             }
         }
 
-        public void Drain(ref T[] buffer, int index, int count)
+        public void Drain(T[] buffer, int index, int count)
         {
             if(itemsCount == 0)
                 return;

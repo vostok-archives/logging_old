@@ -15,11 +15,11 @@ namespace Vostok.Logging
 
         public Exception Exception { get; }
 
-        public LogEvent(LogLevel level, string messageTemplate, IReadOnlyDictionary<string, object> properties = null, Exception exception = null)
+        public LogEvent(LogLevel level, DateTimeOffset timestamp, string messageTemplate, IReadOnlyDictionary<string, object> properties = null, Exception exception = null)
         {
             Level = level;
-            Timestamp = DateTimeOffset.Now;
-            MessageTemplate = messageTemplate ?? string.Empty;
+            Timestamp = timestamp;
+            MessageTemplate = messageTemplate;
             Properties = properties;
             Exception = exception;
         }

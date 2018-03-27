@@ -42,7 +42,7 @@ namespace Vostok.Logging.Logs
 
         private static void WriteEventsToConsole()
         {
-            eventsBuffer.Drain(ref currentEvents, 0, currentEvents.Length);
+            eventsBuffer.Drain(currentEvents, 0, currentEvents.Length);
             foreach (var currentEvent in currentEvents)
             {
                 if(currentEvent == null)
@@ -61,7 +61,7 @@ namespace Vostok.Logging.Logs
             return $"{@event.Timestamp:HH:mm:ss.fff} {@event.Level} {message} {@event.Exception}{Environment.NewLine}";
         }
 
-        private static LogEvent[] currentEvents = new LogEvent[Capacity];
+        private static readonly LogEvent[] currentEvents = new LogEvent[Capacity];
         private static readonly BoundedBuffer<LogEvent> eventsBuffer = new BoundedBuffer<LogEvent>(Capacity);
 
         private static readonly Dictionary<LogLevel, ConsoleColor> levelToColor = new Dictionary<LogLevel, ConsoleColor>

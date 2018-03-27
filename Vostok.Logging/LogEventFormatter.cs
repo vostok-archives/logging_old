@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Vostok.Logging
 {
-    public static class LogEventFormatter
+    internal static class LogEventFormatter
     {
         // TODO(krait): Probably contains bugs. More tests are required.
         public static string FormatMessage(string template, IReadOnlyDictionary<string, object> properties)
