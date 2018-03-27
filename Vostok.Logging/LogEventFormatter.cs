@@ -6,7 +6,6 @@ namespace Vostok.Logging
 {
     internal static class LogEventFormatter
     {
-        // TODO(krait): Probably contains bugs. More tests are required.
         public static string FormatMessage(string template, IReadOnlyDictionary<string, object> properties)
         {
             if (template == null)
@@ -15,95 +14,138 @@ namespace Vostok.Logging
             if (properties == null)
                 return template;
 
-            var partBuffer = new StringBuffer(template.Length);
             var resultBuilder = new StringBuilder(template.Length * 3);
+            var tokenBuilder = new TokenBuilder(template.Length);
 
-            var inKey = false;
             for (var i = 0; i < template.Length; i++)
             {
                 var currentChar = template[i];
-                if (currentChar == '{')
+
+                if (currentChar != '{' && currentChar != '}')
                 {
-                    if (inKey)
-                        resultBuilder.Append('{');
-                    if (inKey && partBuffer.IsEmpty)
-                    {
-                        resultBuilder.Append('{');
-                        inKey = false;
-                    }
-                    else
-                    {
-                        inKey = true;
-                        partBuffer.MoveToBuilder(resultBuilder);
-                    }
+                    tokenBuilder.Add(currentChar);
                     continue;
                 }
 
-                if (currentChar == '}' && inKey)
-                {
-                    var key = partBuffer.MoveToString();
-                    if (properties.TryGetValue(key, out var value))
-                        resultBuilder.Append(value);
-                    else
-                        resultBuilder.Append('{').Append(key).Append('}');
+                if (!tokenBuilder.IsEmpty)
+                    tokenBuilder.MoveToBuilder(resultBuilder);
 
-                    inKey = false;
+                if (i == template.Length - 1)
+                {
+                    tokenBuilder.Add(currentChar);
                     continue;
                 }
 
-                partBuffer.Add(currentChar);
+                var nextChar = template[i + 1];
+                if (currentChar == nextChar)
+                {
+                    tokenBuilder.Add(currentChar);
+                    i++;
+                    continue;
+                }
+
+                if (currentChar == '}')
+                {
+                    tokenBuilder.Add(currentChar);
+                    continue;
+                }
+
+                var findTokenResult = tokenBuilder.TryFindToken(template, i);
+
+                i += tokenBuilder.Length - 1;
+
+                if (findTokenResult)
+                {
+                    var key = tokenBuilder.GetKeyFromBuffer();
+                    if (properties.ContainsKey(key))
+                    {
+                        resultBuilder.Append(properties[key]);
+                        tokenBuilder.Clear();
+                    }
+                }
             }
 
-            if (inKey)
-                resultBuilder.Append('{');
-            if (!partBuffer.IsEmpty)
-                partBuffer.MoveToBuilder(resultBuilder);
+            if(!tokenBuilder.IsEmpty)
+                tokenBuilder.MoveToBuilder(resultBuilder);
 
             return resultBuilder.ToString();
         }
 
-        private struct StringBuffer
+        private struct TokenBuilder
         {
-            public StringBuffer(int length)
+            public int Length { get; private set; }
+
+            public TokenBuilder(int length)
             {
-                index = 0;
+                Length = 0;
                 chars = new char[length];
+            }
+
+            public bool TryFindToken(string template, int startIndex)
+            {
+                if (startIndex < 0 || startIndex > template.Length - 1)               
+                    return false;
+
+                var currentChar = template[startIndex];
+                Add(currentChar);
+
+                if (currentChar != '{')
+                    return false;
+
+                for (var i = startIndex + 1; i < template.Length; i++)
+                {
+                    currentChar = template[i];
+
+                    if (currentChar == '{')
+                        return false;
+
+                    Add(currentChar);
+
+                    if (currentChar == '}')
+                        return true;
+                }
+
+                return false;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void MoveToBuilder(StringBuilder builder)
             {
-                if (index == 0)
+                if (Length == 0)
                     return;
 
-                builder.Append(chars, 0, index);
-                index = 0;
+                builder.Append(chars, 0, Length);
+                Length = 0;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public string MoveToString()
+            public string GetKeyFromBuffer()
             {
-                if (index == 0)
+                if (Length <= 2)
                     return "";
 
-                var value = new string(chars, 0, index);
-                index = 0;
+                var value = new string(chars, 1, Length - 2);
                 return value;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Add(char c)
             {
-                chars[index++] = c;
+                chars[Length++] = c;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Clear()
+            {
+                Length = 0;
             }
 
             public bool IsEmpty
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get { return index == 0; }
+                get { return Length == 0; }
             }
 
-            private int index;
             private readonly char[] chars;
         }
     }

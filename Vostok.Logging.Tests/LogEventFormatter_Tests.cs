@@ -30,6 +30,20 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
+        public void FormatMessage_should_work_correctly_if_template_ends_with_left_brace()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("aa{", properties).Should().BeEquivalentTo("aa{");
+        }
+
+        [Test]
+        public void FormatMessage_should_work_correctly_if_template_starts_with_right_brace()
+        {
+            var properties = new Dictionary<string, object> { { "prop", "value" } };
+            LogEventFormatter.FormatMessage("}aa", properties).Should().BeEquivalentTo("}aa");
+        }
+
+        [Test]
         public void FormatMessage_should_not_replace_placeholder_with_doubled_braces()
         {
             var properties = new Dictionary<string, object> { { "prop", "value" } };
@@ -54,14 +68,14 @@ namespace Vostok.Logging.Tests
         public void FormatMessage_should_not_replace_placeholder_if_left_brace_is_doubled()
         {
             var properties = new Dictionary<string, object> { { "prop", "value" } };
-            LogEventFormatter.FormatMessage("aa{{prop}bb", properties).Should().BeEquivalentTo("aa{{prop}bb");
+            LogEventFormatter.FormatMessage("aa{{prop}bb", properties).Should().BeEquivalentTo("aa{prop}bb");
         }
 
         [Test]
-        public void FormatMessage_should_not_replace_placeholder_if_right_brace_is_doubled()
+        public void FormatMessage_should_replace_placeholder_if_right_brace_is_doubled()
         {
             var properties = new Dictionary<string, object> { { "prop", "value" } };
-            LogEventFormatter.FormatMessage("aa{prop}}bb", properties).Should().BeEquivalentTo("aa{prop}}bb");
+            LogEventFormatter.FormatMessage("aa{prop}}bb", properties).Should().BeEquivalentTo("aavalue}bb");
         }
 
         [Test]
@@ -142,14 +156,14 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void FormatMessage_should_not_use_ignore_case_if_props_are_not_ignorecased()
+        public void FormatMessage_should_not_ignore_case_if_props_are_not_ignorecased()
         {
             var properties = new Dictionary<string, object> { { "Prop", "value" } };
             LogEventFormatter.FormatMessage("aa{prop}bb", properties).Should().BeEquivalentTo("aa{prop}bb");
         }
 
         [Test]
-        public void FormatMessage_should_use_ignore_case_if_props_are_ignorecased()
+        public void FormatMessage_should_ignore_case_if_props_are_ignorecased()
         {
             var properties = new Dictionary<string, object>(StringComparer.CurrentCultureIgnoreCase) { { "Prop", "value" } };
             LogEventFormatter.FormatMessage("aa{prop}bb", properties).Should().BeEquivalentTo("aavaluebb");
