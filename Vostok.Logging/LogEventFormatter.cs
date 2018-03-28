@@ -57,15 +57,17 @@ namespace Vostok.Logging
                 if (findTokenResult)
                 {
                     var key = tokenBuilder.GetKeyFromBuffer();
-                    if (properties.ContainsKey(key))
+                    if (properties.TryGetValue(key, out var value))
                     {
-                        resultBuilder.Append(properties[key]);
+                        // TODO(krait): Support IFormattable with invariant culture
+
+                        resultBuilder.Append(value);
                         tokenBuilder.Clear();
                     }
                 }
             }
 
-            if(!tokenBuilder.IsEmpty)
+            if (!tokenBuilder.IsEmpty)
                 tokenBuilder.MoveToBuilder(resultBuilder);
 
             return resultBuilder.ToString();

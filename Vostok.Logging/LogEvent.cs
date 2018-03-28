@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Vostok.Logging
 {
@@ -20,7 +21,7 @@ namespace Vostok.Logging
             Level = level;
             Timestamp = timestamp;
             MessageTemplate = messageTemplate;
-            Properties = properties;
+            Properties = properties?.ToDictionary(p => p.Key, p => p.Value, StringComparer.CurrentCultureIgnoreCase);
             Exception = exception;
         }
     }
