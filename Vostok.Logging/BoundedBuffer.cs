@@ -51,7 +51,7 @@ namespace Vostok.Logging
             {
                 var itemIndex = (backPtr + i) % items.Length;
                 var item = Interlocked.Exchange(ref items[itemIndex], null);
-                if(item == null)
+                if (item == null)
                     break;
 
                 buffer[index + resultCount++] = item;

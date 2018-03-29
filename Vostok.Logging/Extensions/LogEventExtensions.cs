@@ -10,7 +10,7 @@ namespace Vostok.Logging.Extensions
         {
             Dictionary<string, object> properties;
 
-            if(@event.Properties != null)
+            if (@event.Properties != null)
             {
                 if (@event.Properties.ContainsKey(key))
                 {
