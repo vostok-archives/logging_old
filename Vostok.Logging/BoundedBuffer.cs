@@ -9,6 +9,7 @@ namespace Vostok.Logging
         public BoundedBuffer(int capacity)
         {
             items = new T[capacity];
+            canDrain = new ManualResetEventSlim();
         }
 
         public bool TryAdd(T item)
@@ -28,6 +29,8 @@ namespace Vostok.Logging
                         if (Interlocked.CompareExchange(ref frontPtr, (currentFrontPtr + 1)%items.Length, currentFrontPtr) == currentFrontPtr)
                         {
                             items[currentFrontPtr] = item;
+                            if (currentCount == 0)
+                                canDrain.Set();
                             return true;
                         }
                     }
@@ -35,10 +38,12 @@ namespace Vostok.Logging
             }
         }
 
-        public void Drain(T[] buffer, int index, int count)
+        public int Drain(T[] buffer, int index, int count)
         {
-            if(itemsCount == 0)
-                return;
+            if (itemsCount == 0)
+                return 0;
+
+            canDrain.Reset();
 
             var resultCount = 0;
 
@@ -55,8 +60,16 @@ namespace Vostok.Logging
             backPtr = (backPtr + resultCount) % items.Length;
 
             Interlocked.Add(ref itemsCount, -resultCount);
+
+            return resultCount;
         }
 
+        public void WaitForNewItems()
+        {
+            canDrain.Wait();
+        }
+
+        private readonly ManualResetEventSlim canDrain;
         private readonly T[] items;
         private int itemsCount;
         private int frontPtr;

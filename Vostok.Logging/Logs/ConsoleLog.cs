@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Vostok.Commons.ThreadManagment;
 
 namespace Vostok.Logging.Logs
 {
@@ -13,7 +14,7 @@ namespace Vostok.Logging.Logs
 
         public void Log(LogEvent @event)
         {
-            if(@event == null)
+            if (@event == null)
                 return;
 
             eventsBuffer.TryAdd(@event);
@@ -23,7 +24,7 @@ namespace Vostok.Logging.Logs
 
         private static void StartNewLoggingThread()
         {
-            var thread = new Thread(() =>
+            ThreadRunner.Run(() =>
                 {
                     while (true)
                     {
@@ -35,19 +36,18 @@ namespace Vostok.Logging.Logs
                         {
                             Thread.Sleep(300);
                         }
+                        if (eventsBuffer.Count == 0)
+                            eventsBuffer.WaitForNewItems();
                     }
                 });
-            thread.Start();
         }
 
         private static void WriteEventsToConsole()
         {
-            eventsBuffer.Drain(currentEvents, 0, currentEvents.Length);
-            foreach (var currentEvent in currentEvents)
+            var eventsCount = eventsBuffer.Drain(currentEvents, 0, currentEvents.Length);
+            for (var i = 0; i < eventsCount; i++)
             {
-                if(currentEvent == null)
-                    break;
-
+                var currentEvent = currentEvents[i];
                 using (new ConsoleColorChanger(levelToColor[currentEvent.Level]))
                 {
                     Console.Out.Write(FormatEvent(currentEvent));
