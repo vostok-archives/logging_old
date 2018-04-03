@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27428.2011
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vostok.Logging", "Vostok.Logging\Vostok.Logging.csproj", "{5E05D90B-46F5-4CB1-AE9F-D3FBF78B06B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vostok.Logging.Tests", "Vostok.Logging.Tests\Vostok.Logging.Tests.csproj", "{E75AF6DD-7DD3-4D23-96CA-7AB9B97497DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vostok.Logging.Tests", "Vostok.Logging.Tests\Vostok.Logging.Tests.csproj", "{E75AF6DD-7DD3-4D23-96CA-7AB9B97497DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentAssertions;
+using FluentAssertions.Extensions;
 using NUnit.Framework;
 using Vostok.Logging.Extensions;
 
@@ -38,6 +39,16 @@ namespace Vostok.Logging.Tests
             var @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message");
             @event = @event.SetProperty("A", 1);
             @event.Properties.Should().BeEquivalentTo(new Dictionary<string, object> { { "A", 1 } });
+        }
+
+
+        [Test]
+        public void Test()
+        {
+            var t = DateTimeOffset.Now;
+            var t1 = t.ToOffset(3.Hours());
+            var k = t.ToString("HH:mz:s.fff zzzzz");
+            ;
         }
     }
 }
