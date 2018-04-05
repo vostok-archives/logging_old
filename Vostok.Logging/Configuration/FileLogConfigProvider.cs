@@ -1,54 +1,133 @@
 ﻿using System;
 using System.Configuration;
+using System.IO;
 using System.Text;
-using Vostok.Commons;
+using System.Threading;
+using Vostok.Commons.Conversions;
+using Vostok.Commons.ThreadManagment;
 
 namespace Vostok.Logging.Configuration
 {
     internal class FileLogConfigProvider : IFileLogConfigProvider
     {
-        public string FilePath => GetSettingOrDefault(Section.FilePath.Value, "C:\\logs\\log");
-        public bool ImmediateFlush => GetSettingOrDefault(Section.ImmediateFlush.Value, true);
-        public bool AppendToFile => GetSettingOrDefault(Section.AppendToFile.Value, true);
-        public string ConversionPattern => GetSettingOrDefault(Section.ConversionPattern.Value, "");
-        public DataSize MaxFileSize => GetSettingOrDefault(Section.MaxFileSize.Value, DataSize.FromMegabytes(5));
-        public RollingStyle RollingStyle => GetSettingOrDefault(Section.RollingStyle.Value, RollingStyle.Date);
-        public string DatePattern => GetSettingOrDefault(Section.DatePattern.Value, "yyyy.MM.dd");
-        public Encoding Encoding => GetSettingOrDefault(Section.Encoding.Value, Encoding.Default);
+        public FileLogSettings Settings { get; private set; }
 
-        private static FileLogConfigSection Section => (FileLogConfigSection)ConfigurationManager.GetSection(FileLogConfigSectionName);
-
-        private static string GetSettingOrDefault(string value, string defaultValue)
+        public FileLogConfigProvider()
         {
-            return !string.IsNullOrEmpty(value) ? value : defaultValue;
+            Settings = CreateNewSettings();
+            ThreadRunner.Run(() =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        UpdateCache();
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
+
+                    Thread.Sleep(updateCachePeriod);
+                }
+            });
         }
 
-        private static bool GetSettingOrDefault(string value, bool defaultValue)
+        private void UpdateCache()
         {
-            return bool.TryParse(value, out var result) ? result : defaultValue;
+            var section = Section;
+            var settingsWereChanged = TryUpdateFilePath(section) ||
+                                      TryUpdateConversionPattern(section) ||
+                                      TryUpdateAppendToFile(section) ||
+                                      TryUpdateEnableRolling(section) ||
+                                      TryUpdateEncoding(section);
+
+            if(!settingsWereChanged)
+                return;
+
+            Settings = CreateNewSettings();
         }
 
-        private static DataSize GetSettingOrDefault(string value, DataSize defaultValue)
+        private FileLogSettings CreateNewSettings()
         {
-            return DataSize.TryParse(value, out var result) ? result : defaultValue;
+            return new FileLogSettings
+            {
+                FilePath = filePath,
+                ConversionPattern = conversionPattern,
+                AppendToFile = appendToFile,
+                EnableRolling = enableRolling,
+                Encoding = encoding
+            };
         }
 
-        private static RollingStyle GetSettingOrDefault(string value, RollingStyle defaultValue)
+        private bool TryUpdateFilePath(FileLogConfigSection section)
         {
-            return Enum.TryParse(value, out RollingStyle result) ? result : defaultValue;
+            var value = section.FilePath.Value;
+            if (filePath.Equals(value, StringComparison.CurrentCultureIgnoreCase))
+                return false;
+
+            if (!Directory.Exists(Path.GetDirectoryName(value)))
+                return false;
+
+            //TODO(mylov): Need for check of file name correctness
+            filePath = value;
+            return true;
         }
 
-        private static Encoding GetSettingOrDefault(string value, Encoding defaultValue)
+        private bool TryUpdateConversionPattern(FileLogConfigSection section)
+        {
+            var value = section.ConversionPattern.Value;
+            if (conversionPattern.PatternStr.Equals(value, StringComparison.CurrentCultureIgnoreCase))
+                return false;
+
+            conversionPattern = ConversionPattern.FromString(value);
+            return true;
+        }
+
+        private bool TryUpdateAppendToFile(FileLogConfigSection section)
+        {
+            if (bool.TryParse(section.AppendToFile.Value, out var value))
+            {
+                appendToFile = value;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryUpdateEnableRolling(FileLogConfigSection section)
+        {
+            if (bool.TryParse(section.EnableRolling.Value, out var value))
+            {
+                enableRolling = value;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryUpdateEncoding(FileLogConfigSection section)
         {
             try
             {
-                return Encoding.GetEncoding(value);
+                encoding = Encoding.GetEncoding(section.Encoding.Value);
+                return true;
             }
             catch (Exception)
             {
-                return defaultValue;
+                return false;
             }
         }
+
+        private static FileLogConfigSection Section => (FileLogConfigSection)ConfigurationManager.GetSection(FileLogConfigSectionName);
+
+        private string filePath = "C:\\logs\\log";
+        private ConversionPattern conversionPattern = ConversionPattern.Default;
+        private bool appendToFile = true;
+        private bool enableRolling = true;
+        private Encoding encoding = Encoding.Default;
+
+        private readonly TimeSpan updateCachePeriod = 5.Seconds();
 
         private const string FileLogConfigSectionName = "fileLogConfig";
     }

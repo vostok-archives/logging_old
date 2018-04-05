@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 using Vostok.Commons.ThreadManagment;
 using Vostok.Logging.Configuration;
@@ -9,9 +8,9 @@ namespace Vostok.Logging.Logs
 {
     public class FileLog : ILog
     {
-        public FileLog()
+        static FileLog()
         {
-            var configProvider = new FileLogConfigProvider();
+            configProvider = new FileLogConfigProvider();
             StartNewLoggingThread();
         }
 
@@ -29,27 +28,22 @@ namespace Vostok.Logging.Logs
         {
             ThreadRunner.Run(() =>
             {
-                var filePath = "D:/log";
-
-                var encoding = Encoding.UTF8;
-                var datePattern = "HH:mm:ss.fff";
-
-                var date = DateTimeOffset.UtcNow.Date;
-
-                var file = File.Open($"{filePath}{date.ToString(datePattern)}", FileMode.Append, FileAccess.Write, FileShare.Read);
-                var writer = new StreamWriter(file, encoding);
-
+                var startDate = DateTimeOffset.UtcNow.Date;
+                var writer = CreateFileWriter();
                 while (true)
                 {
-                    var currentDate = DateTimeOffset.UtcNow.Date;
-                    if (currentDate > date)
-                    {
-                        writer.Close();
-                        file = File.Open(filePath, FileMode.Append, FileAccess.Write, FileShare.Read);
-                        writer = new StreamWriter(file, encoding);
-                    }
                     try
                     {
+                        if (configProvider.Settings.EnableRolling)
+                        {
+                            var currentDate = DateTimeOffset.UtcNow.Date;
+                            if (currentDate > startDate)
+                            {
+                                writer.Close();
+                                writer = CreateFileWriter();
+                            }
+                        }
+
                         WriteEventsToFile(writer);
                     }
                     catch (Exception)
@@ -61,11 +55,26 @@ namespace Vostok.Logging.Logs
                     {
                         writer.Close();
                         eventsBuffer.WaitForNewItems();
-                        file = File.Open(filePath, FileMode.Append, FileAccess.Write, FileShare.Read);
-                        writer = new StreamWriter(file, encoding);
+                        writer = CreateFileWriter();
                     }
                 }
             });
+        }
+
+        private static TextWriter CreateFileWriter()
+        {
+            var settings = configProvider.Settings;
+
+            var fileName = settings.EnableRolling 
+                ? $"{settings.FilePath}{DateTimeOffset.UtcNow.Date:yyyy.MM.dd}" 
+                : settings.FilePath;
+
+            var fileMode = settings.AppendToFile 
+                ? FileMode.Append 
+                : FileMode.OpenOrCreate;
+
+            var file = File.Open(fileName, fileMode, FileAccess.Write, FileShare.Read);
+            return new StreamWriter(file, settings.Encoding);
         }
 
         private static void WriteEventsToFile(TextWriter writer)
@@ -74,19 +83,15 @@ namespace Vostok.Logging.Logs
             for (var i = 0; i < eventsCount; i++)
             {
                 var currentEvent = currentEvents[i];
-                writer.Write(FormatEvent(currentEvent));
+                writer.Write(configProvider.Settings.ConversionPattern.Format(currentEvent));
             }
             writer.Flush();
         }
 
-        private static string FormatEvent(LogEvent @event)
-        {
-            var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
-            return $"{@event.Timestamp:HH:mm:ss.fff zzz} {@event.Level} {message} {@event.Exception}{Environment.NewLine}";
-        }
-
         private static readonly LogEvent[] currentEvents = new LogEvent[Capacity];
         private static readonly BoundedBuffer<LogEvent> eventsBuffer = new BoundedBuffer<LogEvent>(Capacity);
+
+        private static readonly FileLogConfigProvider configProvider;
 
         private const int Capacity = 10000;
     }

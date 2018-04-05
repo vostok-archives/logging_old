@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using NSubstitute;
 using NUnit.Framework;
 using Vostok.Logging.Extensions;
