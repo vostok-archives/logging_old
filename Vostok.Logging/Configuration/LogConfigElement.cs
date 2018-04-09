@@ -2,7 +2,7 @@
 
 namespace Vostok.Logging.Configuration
 {
-    internal class FileLogConfigElement : ConfigurationElement
+    internal class LogConfigElement : ConfigurationElement
     {
         [ConfigurationProperty(TypePropertyName, DefaultValue = "", IsKey = true, IsRequired = false)]
         public string Type => (string)base[TypePropertyName];

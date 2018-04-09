@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Vostok.Logging.Extensions
 {
-    internal static class LogEventExtensions
+    public static class LogEventExtensions
     {
         public static LogEvent SetProperty<T>(this LogEvent @event, string key, T value)
         {

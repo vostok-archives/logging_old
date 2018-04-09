@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -60,8 +62,7 @@ namespace Vostok.Logging
                     if (properties.TryGetValue(key, out var value))
                     {
                         // TODO(krait): Support IFormattable with invariant culture
-
-                        resultBuilder.Append(value);
+                        resultBuilder.Append((value as IFormattable)?.ToString("", new CultureInfo(1)) ?? value);
                         tokenBuilder.Clear();
                     }
                 }
@@ -85,7 +86,7 @@ namespace Vostok.Logging
 
             public bool TryFindToken(string template, int startIndex)
             {
-                if (startIndex < 0 || startIndex > template.Length - 1)               
+                if (startIndex < 0 || startIndex > template.Length - 1)
                     return false;
 
                 var currentChar = template[startIndex];
@@ -123,11 +124,9 @@ namespace Vostok.Logging
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public string GetKeyFromBuffer()
             {
-                if (Length <= 2)
-                    return "";
-
-                var value = new string(chars, 1, Length - 2);
-                return value;
+                return Length <= 2
+                    ? string.Empty
+                    : new string(chars, 1, Length - 2);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

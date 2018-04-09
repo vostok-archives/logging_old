@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Vostok.Commons.ThreadManagment;
+using Vostok.Logging.Configuration.ConsoleLog;
 
 namespace Vostok.Logging.Logs
 {
@@ -9,6 +10,7 @@ namespace Vostok.Logging.Logs
     {
         static ConsoleLog()
         {
+            configProvider = new ConsoleLogConfigProvider();
             StartNewLoggingThread();
         }
 
@@ -24,25 +26,29 @@ namespace Vostok.Logging.Logs
 
         private static void StartNewLoggingThread()
         {
-            ThreadRunner.Run(() =>
+            ThreadRunner.Run(() => 
+            {
+                while (true)
                 {
-                    while (true)
+                    var settings = configProvider.Settings;
+                    try
                     {
-                        try
-                        {
-                            WriteEventsToConsole();
-                        }
-                        catch (Exception)
-                        {
-                            Thread.Sleep(300);
-                        }
-                        if (eventsBuffer.Count == 0)
-                            eventsBuffer.WaitForNewItems();
+                        WriteEventsToConsole(settings);
                     }
-                });
+                    catch (Exception)
+                    {
+                        Thread.Sleep(300);
+                    }
+
+                    if (eventsBuffer.Count == 0)
+                    {
+                        eventsBuffer.WaitForNewItems();
+                    }
+                }
+            });
         }
 
-        private static void WriteEventsToConsole()
+        private static void WriteEventsToConsole(ConsoleLogSettings settings)
         {
             var eventsCount = eventsBuffer.Drain(currentEvents, 0, currentEvents.Length);
             for (var i = 0; i < eventsCount; i++)
@@ -50,15 +56,9 @@ namespace Vostok.Logging.Logs
                 var currentEvent = currentEvents[i];
                 using (new ConsoleColorChanger(levelToColor[currentEvent.Level]))
                 {
-                    Console.Out.Write(FormatEvent(currentEvent));
+                    Console.Out.Write(settings.ConversionPattern.Format(currentEvent));
                 }
             }
-        }
-
-        private static string FormatEvent(LogEvent @event)
-        {
-            var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
-            return $"{@event.Timestamp:HH:mm:ss.fff} {@event.Level} {message} {@event.Exception}{Environment.NewLine}";
         }
 
         private static readonly LogEvent[] currentEvents = new LogEvent[Capacity];
@@ -72,6 +72,8 @@ namespace Vostok.Logging.Logs
             {LogLevel.Error, ConsoleColor.Red},
             {LogLevel.Fatal, ConsoleColor.Red}
         };
+
+        private static readonly IConsoleLogConfigProvider configProvider;
 
         private const int Capacity = 10000;
     }

@@ -6,7 +6,7 @@ using System.Threading;
 using Vostok.Commons.Conversions;
 using Vostok.Commons.ThreadManagment;
 
-namespace Vostok.Logging.Configuration
+namespace Vostok.Logging.Configuration.FileLog
 {
     internal class FileLogConfigProvider : IFileLogConfigProvider
     {
@@ -36,6 +36,9 @@ namespace Vostok.Logging.Configuration
         private void UpdateCache()
         {
             var section = Section;
+            if(section == null)
+                return;
+
             var settingsWereChanged = TryUpdateFilePath(section) ||
                                       TryUpdateConversionPattern(section) ||
                                       TryUpdateAppendToFile(section) ||

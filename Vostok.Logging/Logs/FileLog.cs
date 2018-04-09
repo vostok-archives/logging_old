@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading;
 using Vostok.Commons.ThreadManagment;
-using Vostok.Logging.Configuration;
+using Vostok.Logging.Configuration.FileLog;
 
 namespace Vostok.Logging.Logs
 {
@@ -29,22 +29,24 @@ namespace Vostok.Logging.Logs
             ThreadRunner.Run(() =>
             {
                 var startDate = DateTimeOffset.UtcNow.Date;
-                var writer = CreateFileWriter();
+                var settings = configProvider.Settings;
+                var writer = CreateFileWriter(settings);
+
                 while (true)
                 {
+                    var settingsWereUpdated = TryUpdateSettings(ref settings);
                     try
                     {
-                        if (configProvider.Settings.EnableRolling)
+                        var currentDate = DateTimeOffset.UtcNow.Date;
+
+                        if (settingsWereUpdated || settings.EnableRolling && currentDate > startDate)
                         {
-                            var currentDate = DateTimeOffset.UtcNow.Date;
-                            if (currentDate > startDate)
-                            {
-                                writer.Close();
-                                writer = CreateFileWriter();
-                            }
+                            writer.Close();
+                            writer = CreateFileWriter(settings);
+                            startDate = currentDate;
                         }
 
-                        WriteEventsToFile(writer);
+                        WriteEventsToFile(writer, settings);
                     }
                     catch (Exception)
                     {
@@ -53,18 +55,26 @@ namespace Vostok.Logging.Logs
 
                     if (eventsBuffer.Count == 0)
                     {
-                        writer.Close();
                         eventsBuffer.WaitForNewItems();
-                        writer = CreateFileWriter();
                     }
                 }
             });
         }
 
-        private static TextWriter CreateFileWriter()
+        private static bool TryUpdateSettings(ref FileLogSettings settings)
         {
-            var settings = configProvider.Settings;
+            var newSettings = configProvider.Settings;
+            if (!settings.Equals(newSettings))
+            {
+                settings = newSettings;
+                return true;
+            }
 
+            return false;
+        }
+
+        private static TextWriter CreateFileWriter(FileLogSettings settings)
+        {
             var fileName = settings.EnableRolling 
                 ? $"{settings.FilePath}{DateTimeOffset.UtcNow.Date:yyyy.MM.dd}" 
                 : settings.FilePath;
@@ -77,13 +87,13 @@ namespace Vostok.Logging.Logs
             return new StreamWriter(file, settings.Encoding);
         }
 
-        private static void WriteEventsToFile(TextWriter writer)
+        private static void WriteEventsToFile(TextWriter writer, FileLogSettings settings)
         {
             var eventsCount = eventsBuffer.Drain(currentEvents, 0, currentEvents.Length);
             for (var i = 0; i < eventsCount; i++)
             {
                 var currentEvent = currentEvents[i];
-                writer.Write(configProvider.Settings.ConversionPattern.Format(currentEvent));
+                writer.Write(settings.ConversionPattern.Format(currentEvent));
             }
             writer.Flush();
         }
@@ -91,7 +101,7 @@ namespace Vostok.Logging.Logs
         private static readonly LogEvent[] currentEvents = new LogEvent[Capacity];
         private static readonly BoundedBuffer<LogEvent> eventsBuffer = new BoundedBuffer<LogEvent>(Capacity);
 
-        private static readonly FileLogConfigProvider configProvider;
+        private static readonly IFileLogConfigProvider configProvider;
 
         private const int Capacity = 10000;
     }

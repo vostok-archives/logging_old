@@ -1,4 +1,4 @@
-﻿namespace Vostok.Logging.Configuration
+﻿namespace Vostok.Logging.Configuration.FileLog
 {
     internal interface IFileLogConfigProvider
     {

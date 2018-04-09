@@ -1,23 +1,23 @@
 ﻿using System.Configuration;
 
-namespace Vostok.Logging.Configuration
+namespace Vostok.Logging.Configuration.FileLog
 {
     internal class FileLogConfigSection : ConfigurationSection
     {
         [ConfigurationProperty(FilePathPropertyName)]
-        public FileLogConfigElement FilePath => (FileLogConfigElement)base[FilePathPropertyName];
+        public LogConfigElement FilePath => (LogConfigElement)base[FilePathPropertyName];
 
         [ConfigurationProperty(AppendToFilePropertyName)]
-        public FileLogConfigElement AppendToFile => (FileLogConfigElement)base[AppendToFilePropertyName];
+        public LogConfigElement AppendToFile => (LogConfigElement)base[AppendToFilePropertyName];
 
         [ConfigurationProperty(ConversionPatternPropertyName)]
-        public FileLogConfigElement ConversionPattern => (FileLogConfigElement)base[ConversionPatternPropertyName];
+        public LogConfigElement ConversionPattern => (LogConfigElement)base[ConversionPatternPropertyName];
 
         [ConfigurationProperty(EnableRollingPropertyName)]
-        public FileLogConfigElement EnableRolling => (FileLogConfigElement)base[EnableRollingPropertyName];
+        public LogConfigElement EnableRolling => (LogConfigElement)base[EnableRollingPropertyName];
 
         [ConfigurationProperty(EncodingPropertyName)]
-        public FileLogConfigElement Encoding => (FileLogConfigElement)base[EncodingPropertyName];
+        public LogConfigElement Encoding => (LogConfigElement)base[EncodingPropertyName];
 
         private const string FilePathPropertyName = "file";
         private const string AppendToFilePropertyName = "appendToFile";
