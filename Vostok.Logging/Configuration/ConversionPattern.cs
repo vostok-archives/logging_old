@@ -23,6 +23,7 @@ namespace Vostok.Logging.Configuration
             var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
             var exception = @event.Exception;
             var newLine = Environment.NewLine;
+            //TODO(mylov): Need add IFormattable support
             var properties = string.Join(", ", @event.Properties.Values);
 
             var formattedLine = string.Format(formatString, timestamp, level, message, exception, newLine, properties);

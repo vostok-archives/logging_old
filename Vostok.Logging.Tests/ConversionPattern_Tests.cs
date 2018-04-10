@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
 using Vostok.Logging.Configuration;

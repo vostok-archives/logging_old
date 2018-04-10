@@ -69,10 +69,18 @@ namespace Vostok.Logging.Configuration.FileLog
             if (filePath.Equals(value, StringComparison.CurrentCultureIgnoreCase))
                 return false;
 
-            if (!Directory.Exists(Path.GetDirectoryName(value)))
+            string fullPath;
+            try
+            {
+                fullPath = Path.GetFullPath(filePath);
+            }
+            catch (NotSupportedException)
+            {
+                return false;
+            }
+            if (!Directory.Exists(Path.GetDirectoryName(fullPath)))
                 return false;
 
-            //TODO(mylov): Need for check of file name correctness
             filePath = value;
             return true;
         }

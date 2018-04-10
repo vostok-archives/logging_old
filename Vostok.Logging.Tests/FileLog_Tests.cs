@@ -9,7 +9,5 @@ namespace Vostok.Logging.Tests
         public void Test()
         {
         }
-
-
     }
 }
