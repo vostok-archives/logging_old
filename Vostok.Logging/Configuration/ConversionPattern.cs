@@ -24,9 +24,13 @@ namespace Vostok.Logging.Configuration
             var exception = @event.Exception;
             var newLine = Environment.NewLine;
             //TODO(mylov): Need add IFormattable support
-            var properties = string.Join(", ", @event.Properties.Values);
+            var properties = @event.Properties == null ? null : string.Join(", ", @event.Properties.Values);
 
             var formattedLine = string.Format(formatString, timestamp, level, message, exception, newLine, properties);
+
+            if (@event.Properties == null)
+                return formattedLine;
+
             return Regex.Replace(formattedLine, SinglePropertyPattern, 
                 m => @event.Properties.TryGetValue(m.Groups[1].Value, out var value)
                     ? value.ToString() 
