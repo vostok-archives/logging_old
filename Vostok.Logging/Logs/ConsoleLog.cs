@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using Vostok.Commons.ThreadManagment;
-using Vostok.Logging.Configuration.ConsoleLog;
+using Vostok.Logging.Configuration;
+using Vostok.Logging.Configuration.Settings;
 
 namespace Vostok.Logging.Logs
 {
@@ -10,8 +11,13 @@ namespace Vostok.Logging.Logs
     {
         static ConsoleLog()
         {
-            configProvider = new ConsoleLogConfigProvider();
+            configProvider = new LogConfigProvider<ConsoleLogSettings>(ConfigSectionName);
             StartNewLoggingThread();
+        }
+
+        public void Configure(Func<ConsoleLogSettings> settingsSource)
+        {
+            configProvider = new LogConfigProvider<ConsoleLogSettings>(settingsSource);
         }
 
         public void Log(LogEvent @event)
@@ -73,8 +79,9 @@ namespace Vostok.Logging.Logs
             {LogLevel.Fatal, ConsoleColor.Red}
         };
 
-        private static readonly IConsoleLogConfigProvider configProvider;
+        private static ILogConfigProvider<ConsoleLogSettings> configProvider;
 
         private const int Capacity = 10000;
+        private const string ConfigSectionName = "consoleLogConfig";
     }
 }

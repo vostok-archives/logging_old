@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Vostok.Logging.Configuration
 {
-    internal class ConversionPattern
+    public class ConversionPattern
     {
         public string PatternStr { get; }
 
@@ -23,8 +24,11 @@ namespace Vostok.Logging.Configuration
             var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
             var exception = @event.Exception;
             var newLine = Environment.NewLine;
-            //TODO(mylov): Need add IFormattable support
-            var properties = @event.Properties == null ? null : string.Join(", ", @event.Properties.Values);
+
+            var properties = @event.Properties != null 
+                ? string.Join(", ", @event.Properties.Values
+                    .Select(p => (p as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? p.ToString())) 
+                : null;
 
             var formattedLine = string.Format(formatString, timestamp, level, message, exception, newLine, properties);
 

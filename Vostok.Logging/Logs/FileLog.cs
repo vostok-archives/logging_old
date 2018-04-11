@@ -2,7 +2,8 @@
 using System.IO;
 using System.Threading;
 using Vostok.Commons.ThreadManagment;
-using Vostok.Logging.Configuration.FileLog;
+using Vostok.Logging.Configuration;
+using Vostok.Logging.Configuration.Settings;
 
 namespace Vostok.Logging.Logs
 {
@@ -10,8 +11,13 @@ namespace Vostok.Logging.Logs
     {
         static FileLog()
         {
-            configProvider = new FileLogConfigProvider();
+            configProvider = new LogConfigProvider<FileLogSettings>(ConfigSectionName);
             StartNewLoggingThread();
+        }
+
+        public void Configure(Func<FileLogSettings> settingsSource)
+        {
+            configProvider = new LogConfigProvider<FileLogSettings>(settingsSource);
         }
 
         public void Log(LogEvent @event)
@@ -98,11 +104,12 @@ namespace Vostok.Logging.Logs
             writer.Flush();
         }
 
+        private static ILogConfigProvider<FileLogSettings> configProvider;
+
         private static readonly LogEvent[] currentEvents = new LogEvent[Capacity];
         private static readonly BoundedBuffer<LogEvent> eventsBuffer = new BoundedBuffer<LogEvent>(Capacity);
 
-        private static readonly IFileLogConfigProvider configProvider;
-
         private const int Capacity = 10000;
+        private const string ConfigSectionName = "fileLogConfig";
     }
 }

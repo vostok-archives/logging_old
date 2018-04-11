@@ -61,8 +61,7 @@ namespace Vostok.Logging
                     var key = tokenBuilder.GetKeyFromBuffer();
                     if (properties.TryGetValue(key, out var value))
                     {
-                        // TODO(krait): Support IFormattable with invariant culture
-                        resultBuilder.Append((value as IFormattable)?.ToString("", new CultureInfo(1)) ?? value);
+                        resultBuilder.Append((value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? value);
                         tokenBuilder.Clear();
                     }
                 }
