@@ -4,16 +4,16 @@ namespace Vostok.Logging.Configuration.SettingsSources
 {
     internal class StaticSettingsSource<TSettings> : ISettingsSource<TSettings>
     {
-        public StaticSettingsSource(Func<TSettings> source)
+        public StaticSettingsSource(Func<TSettings> sourceFunc)
         {
-            this.source = source;
+            this.sourceFunc = sourceFunc;
         }
 
         public TSettings GetSettings()
         {
-            return source();
+            return sourceFunc();
         }
 
-        private readonly Func<TSettings> source;
+        private readonly Func<TSettings> sourceFunc;
     }
 }

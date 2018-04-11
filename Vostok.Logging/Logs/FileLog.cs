@@ -70,13 +70,16 @@ namespace Vostok.Logging.Logs
         private static bool TryUpdateSettings(ref FileLogSettings settings)
         {
             var newSettings = configProvider.Settings;
-            if (!settings.Equals(newSettings))
-            {
-                settings = newSettings;
-                return true;
-            }
 
-            return false;
+            if (newSettings.FilePath.Equals(settings.FilePath, StringComparison.CurrentCultureIgnoreCase) &&
+                newSettings.ConversionPattern.PatternStr.Equals(settings.ConversionPattern.PatternStr, StringComparison.CurrentCultureIgnoreCase) &&
+                newSettings.EnableRolling == settings.EnableRolling &&
+                newSettings.AppendToFile == settings.AppendToFile &&
+                newSettings.Encoding.Equals(settings.Encoding))
+                return false;
+
+            settings = newSettings;
+            return true;
         }
 
         private static TextWriter CreateFileWriter(FileLogSettings settings)

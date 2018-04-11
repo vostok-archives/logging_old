@@ -6,54 +6,46 @@ using System.Xml;
 
 namespace Vostok.Logging.Configuration
 {
-    internal class XmlConfigSection
+    internal class XmlConfigSection //TODO(mylov) Check unusual xml document structures
     {
-        public IReadOnlyDictionary<string, string> Settings { get; private set; }
+        public IReadOnlyDictionary<string, string> Settings { get; }
 
         public XmlConfigSection(string sectionName)
         {
-            this.sectionName = sectionName;
-            Update();
-        }
-
-        public void Update()
-        {
             Settings = new Dictionary<string, string>();
-
             try
             {
                 if (sectionName == null)
                     return;
 
-                var dict = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+                var settings = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
 
                 var configPath = $"{AppDomain.CurrentDomain.FriendlyName}.config";
-                var fileReader = File.Open(configPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                var reader = XmlReader.Create(fileReader);
-
-                var result = TryFindSection(reader);
-
-                if (!result)
-                    return;
-
-                while (!(reader.NodeType == XmlNodeType.EndElement && reader.Name.Equals(sectionName)))
+                using (var file = File.Open(configPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var reader = XmlReader.Create(file))
                 {
-                    reader.Read();
-                    if (reader.NodeType != XmlNodeType.Element)
-                        continue;
+                    if (!TryFindSection(reader, sectionName))
+                        return;
 
-                    var key = reader.Name;
-                    var value = reader.GetAttribute("value");
+                    while (!(reader.NodeType == XmlNodeType.EndElement && reader.Name.Equals(sectionName)))
+                    {
+                        reader.Read();
+                        if (reader.NodeType != XmlNodeType.Element)
+                            continue;
 
-                    if (value == null)
-                        continue;
+                        var key = reader.Name;
+                        var value = reader.GetAttribute("value");
 
-                    if (dict.ContainsKey(key))
-                        dict[key] = value;
-                    else
-                        dict.Add(key, value);
+                        if (value == null)
+                            continue;
 
-                    Settings = dict;
+                        if (settings.ContainsKey(key))
+                            settings[key] = value;
+                        else
+                            settings.Add(key, value);
+
+                        Settings = settings;
+                    }
                 }
             }
             catch (Exception)
@@ -62,7 +54,7 @@ namespace Vostok.Logging.Configuration
             }
         }
 
-        private bool TryFindSection(XmlReader reader)
+        private static bool TryFindSection(XmlReader reader, string sectionName)
         {
             while (true)
             {
@@ -85,7 +77,5 @@ namespace Vostok.Logging.Configuration
         {
             return string.Join(", ", Settings.Select(p => $"{p.Key}={p.Value}"));
         }
-
-        private readonly string sectionName;
     }
 }

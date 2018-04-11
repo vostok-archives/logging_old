@@ -18,6 +18,7 @@ namespace Vostok.Logging.Configuration
         private LogConfigProvider(ISettingsSource<TSettings> settingsSource)
         {
             this.settingsSource = settingsSource;
+
             ThreadRunner.Run(() =>
             {
                 while (true)
@@ -45,7 +46,6 @@ namespace Vostok.Logging.Configuration
             if (settings.AreValid())
                 Settings = settings;
         }
-
 
         private readonly ISettingsSource<TSettings> settingsSource;
 

@@ -1,4 +1,6 @@
-﻿using Vostok.Logging.Configuration.Settings;
+﻿using System;
+using System.IO;
+using Vostok.Logging.Configuration.Settings;
 
 namespace Vostok.Logging.Extensions
 {
@@ -36,7 +38,19 @@ namespace Vostok.Logging.Extensions
             if (string.IsNullOrWhiteSpace(filePath))
                 return false;
 
-            //TODO(mylov) Add filePath validation
+            string fullPath;
+            try
+            {
+                fullPath = Path.GetFullPath(filePath);
+            }
+            catch (NotSupportedException)
+            {
+                return false;
+            }
+
+            if (!Directory.Exists(Path.GetDirectoryName(fullPath)))
+                return false;
+
             return true;
         }
     }

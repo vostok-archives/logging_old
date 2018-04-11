@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
+using Vostok.Logging.Configuration.Parsing;
 
 namespace Vostok.Logging.Configuration.SettingsSources
 {
@@ -16,68 +18,37 @@ namespace Vostok.Logging.Configuration.SettingsSources
 
             var section = new XmlConfigSection(sectionName);
             if (section.Settings.Count == 0)
-                return settings;
+                return default(TSettings);
 
-            var settingsType = typeof (TSettings);
-            var properties = settingsType.GetProperties();
-
+            var properties = typeof(TSettings).GetProperties();
             foreach (var property in properties)
             {
-                if (section.Settings.TryGetValue(property.Name, out var value))
+                if (section.Settings.TryGetValue(property.Name, out var setting))
                 {
-                    if (!TryParse(value, property.PropertyType, out var parsedValue))
+                    if (!inlineParsers.TryGetValue(property.PropertyType, out var parser))
                         return default(TSettings);
 
-                    property.SetValue(settings, parsedValue);
+                    if (!parser.TryParse(setting, out var parsedSetting))
+                        return default(TSettings);
+
+                    property.SetValue(settings, parsedSetting);
+                    continue;
                 }
-                else
-                {
-                    return default(TSettings);
-                }
+
+                return default(TSettings);
             }
 
             return settings;
         }
 
-        private static bool TryParse(string str, Type type, out object value)
-        {
-            value = null;
-
-            if (type == typeof (string))
-            {
-                value = str;
-                return true;
-            }
-            if (type == typeof (bool))
-            {
-                var result = bool.TryParse(str, out var innerValue);
-                if (result)
-                    value = innerValue;
-                return result;
-            }
-
-            if (type == typeof(ConversionPattern))
-            {
-                value = ConversionPattern.FromString(str);
-                return true;
-            }
-
-            if (type == typeof (Encoding))
-            {
-                try
-                {
-                    value = Encoding.GetEncoding(str);
-                    return true;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-            }
-
-            return false;
-        }
-
         private readonly string sectionName;
+
+        private readonly Dictionary<Type, IInlineParser> inlineParsers = new Dictionary<Type, IInlineParser>
+        {
+            {typeof(string), new InlineParser<string>(StringParser.TryParse)},
+            {typeof(ConversionPattern), new InlineParser<ConversionPattern>(ConversionPattern.TryParse)},
+            {typeof(bool), new InlineParser<bool>(bool.TryParse)},
+            {typeof(Encoding), new InlineParser<Encoding>(EncodingParser.TryParse)}
+        };
     }
 }

@@ -15,6 +15,16 @@ namespace Vostok.Logging.Configuration
             return new ConversionPattern(patternStr, true);
         }
 
+        public static bool TryParse(string patternStr, out ConversionPattern result)
+        {
+            result = null;
+            if (patternStr == null)
+                return false;
+
+            result = FromString(patternStr);
+            return true;
+        }
+
         public static ConversionPattern Default => new ConversionPattern(string.Join(" ", patternKeys.Keys.Select(k => $"{{{k}}}")), false);
 
         public string Format(LogEvent @event)
@@ -43,11 +53,11 @@ namespace Vostok.Logging.Configuration
 
         private ConversionPattern(string patternStr, bool replaceKeys)
         {
+            PatternStr = patternStr;
             patternStr = string.IsNullOrEmpty(patternStr)
                 ? string.Empty
                 : patternStr;
 
-            PatternStr = patternStr;
             formatString = patternStr;
 
             if (replaceKeys)

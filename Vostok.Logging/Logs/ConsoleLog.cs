@@ -67,9 +67,6 @@ namespace Vostok.Logging.Logs
             }
         }
 
-        private static readonly LogEvent[] currentEvents = new LogEvent[Capacity];
-        private static readonly BoundedBuffer<LogEvent> eventsBuffer = new BoundedBuffer<LogEvent>(Capacity);
-
         private static readonly Dictionary<LogLevel, ConsoleColor> levelToColor = new Dictionary<LogLevel, ConsoleColor>
         {
             {LogLevel.Debug, ConsoleColor.Gray},
@@ -80,6 +77,9 @@ namespace Vostok.Logging.Logs
         };
 
         private static ILogConfigProvider<ConsoleLogSettings> configProvider;
+
+        private static readonly LogEvent[] currentEvents = new LogEvent[Capacity];
+        private static readonly BoundedBuffer<LogEvent> eventsBuffer = new BoundedBuffer<LogEvent>(Capacity);
 
         private const int Capacity = 10000;
         private const string ConfigSectionName = "consoleLogConfig";
