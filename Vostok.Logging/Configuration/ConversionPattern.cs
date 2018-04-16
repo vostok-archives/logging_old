@@ -72,6 +72,24 @@ namespace Vostok.Logging.Configuration
             }
         }
 
+        public override int GetHashCode()
+        {
+            return formatString.ToLower().GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as ConversionPattern);
+        }
+
+        private bool Equals(ConversionPattern other)
+        {
+            if (other == null)
+                return false;
+
+            return formatString.Equals(other.formatString, StringComparison.CurrentCultureIgnoreCase);
+        }
+
         private readonly string formatString;
 
         private static readonly Dictionary<int, string> patternKeys = new Dictionary<int, string>

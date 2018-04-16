@@ -10,7 +10,9 @@ namespace Vostok.Logging.Configuration
     {
         public IReadOnlyDictionary<string, string> Settings { get; }
 
-        public XmlConfigSection(string sectionName)
+        public XmlConfigSection(string sectionName) : this($"{AppDomain.CurrentDomain.FriendlyName}.config", sectionName) { }
+
+        internal XmlConfigSection(string configPath, string sectionName)
         {
             Settings = new Dictionary<string, string>();
             try
@@ -20,7 +22,6 @@ namespace Vostok.Logging.Configuration
 
                 var settings = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
 
-                var configPath = $"{AppDomain.CurrentDomain.FriendlyName}.config";
                 using (var file = File.Open(configPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 using (var reader = XmlReader.Create(file))
                 {

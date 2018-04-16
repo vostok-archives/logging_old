@@ -18,5 +18,19 @@ namespace Vostok.Logging.Configuration.Parsing
                 return false;
             }
         }
+
+        public static bool TryParse(int value, out Encoding result)
+        {
+            result = null;
+            try
+            {
+                result = Encoding.GetEncoding(value);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }
