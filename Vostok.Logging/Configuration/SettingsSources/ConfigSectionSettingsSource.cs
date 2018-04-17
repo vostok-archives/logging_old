@@ -2,22 +2,23 @@
 using System.Collections.Generic;
 using System.Text;
 using Vostok.Logging.Configuration.Parsing;
+using Vostok.Logging.Configuration.Sections;
 
 namespace Vostok.Logging.Configuration.SettingsSources
 {
-    internal class XmlConfigSectionSettingsSource<TSettings> : ISettingsSource<TSettings>  where TSettings: new()
+    internal class ConfigSectionSettingsSource<TSettings> : ISettingsSource<TSettings> where TSettings : new()
     {
-        public XmlConfigSectionSettingsSource(string sectionName)
+        public ConfigSectionSettingsSource(Func<IConfigSection> createSectionFunc)
         {
-            this.sectionName = sectionName;
+            createSection = createSectionFunc;
         }
 
         public TSettings GetSettings()
         {
             var settings = new TSettings();
 
-            var section = new XmlConfigSection(sectionName);
-            if (section.Settings.Count == 0)
+            var section = createSection();
+            if (section == null || section.Settings.Count == 0)
                 return default(TSettings);
 
             var properties = typeof(TSettings).GetProperties();
@@ -32,16 +33,13 @@ namespace Vostok.Logging.Configuration.SettingsSources
                         return default(TSettings);
 
                     property.SetValue(settings, parsedSetting);
-                    continue;
                 }
-
-                return default(TSettings);
             }
 
             return settings;
         }
 
-        private readonly string sectionName;
+        private readonly Func<IConfigSection> createSection;
 
         private readonly Dictionary<Type, IInlineParser> inlineParsers = new Dictionary<Type, IInlineParser>
         {

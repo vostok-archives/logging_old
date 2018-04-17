@@ -4,15 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 
-namespace Vostok.Logging.Configuration
+namespace Vostok.Logging.Configuration.Sections
 {
-    internal class XmlConfigSection //TODO(mylov) Check unusual xml document structures
+    internal class XmlConfigSection : IConfigSection
     {
         public IReadOnlyDictionary<string, string> Settings { get; }
 
-        public XmlConfigSection(string sectionName) : this($"{AppDomain.CurrentDomain.FriendlyName}.config", sectionName) { }
-
-        internal XmlConfigSection(string configPath, string sectionName)
+        public XmlConfigSection(string sectionName, string configPath)
         {
             Settings = new Dictionary<string, string>();
             try
@@ -28,10 +26,18 @@ namespace Vostok.Logging.Configuration
                     if (!TryFindSection(reader, sectionName))
                         return;
 
+                    var settingsDepth = -1;
+
                     while (!(reader.NodeType == XmlNodeType.EndElement && reader.Name.Equals(sectionName)))
                     {
                         reader.Read();
                         if (reader.NodeType != XmlNodeType.Element)
+                            continue;
+
+                        if (settingsDepth < 0)
+                            settingsDepth = reader.Depth;
+
+                        if(settingsDepth != reader.Depth)
                             continue;
 
                         var key = reader.Name;
@@ -44,9 +50,9 @@ namespace Vostok.Logging.Configuration
                             settings[key] = value;
                         else
                             settings.Add(key, value);
-
-                        Settings = settings;
                     }
+
+                    Settings = settings;
                 }
             }
             catch (Exception)

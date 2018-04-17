@@ -2,6 +2,7 @@
 using System.Threading;
 using Vostok.Commons.Conversions;
 using Vostok.Commons.ThreadManagment;
+using Vostok.Logging.Configuration.Sections;
 using Vostok.Logging.Configuration.SettingsSources;
 using Vostok.Logging.Extensions;
 
@@ -11,9 +12,13 @@ namespace Vostok.Logging.Configuration
     {
         public TSettings Settings { get; private set; } = new TSettings();
 
-        public LogConfigProvider(string sectionName) : this(new XmlConfigSectionSettingsSource<TSettings>(sectionName)) { }
+        private readonly Guid id = Guid.NewGuid();
 
-        public LogConfigProvider(Func<TSettings> source) : this(new StaticSettingsSource<TSettings>(source)) { }
+        public LogConfigProvider(string sectionName) 
+            : this(new ConfigSectionSettingsSource<TSettings>(() => new XmlConfigSection(sectionName, $"{AppDomain.CurrentDomain.FriendlyName}.config"))) { }
+
+        public LogConfigProvider(Func<TSettings> source) 
+            : this(new StaticSettingsSource<TSettings>(source)) { }
 
         private LogConfigProvider(ISettingsSource<TSettings> settingsSource)
         {

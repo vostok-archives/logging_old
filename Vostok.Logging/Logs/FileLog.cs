@@ -17,6 +17,7 @@ namespace Vostok.Logging.Logs
 
         public void Configure(Func<FileLogSettings> settingsSource)
         {
+            //TODO(mylov): Need any dispose method for old configprovider? GC?
             configProvider = new LogConfigProvider<FileLogSettings>(settingsSource);
         }
 
@@ -40,6 +41,7 @@ namespace Vostok.Logging.Logs
 
                 while (true)
                 {
+                    //TODO(mylov): Somebody updates my settings :(
                     var settingsWereUpdated = TryUpdateSettings(ref settings);
                     try
                     {
