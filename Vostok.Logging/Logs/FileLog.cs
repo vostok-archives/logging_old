@@ -15,9 +15,9 @@ namespace Vostok.Logging.Logs
             StartNewLoggingThread();
         }
 
-        public void Configure(Func<FileLogSettings> settingsSource)
+        public static void Configure(Func<FileLogSettings> settingsSource)
         {
-            //TODO(mylov): Need any dispose method for old configprovider? GC?
+            configProvider.Dispose();
             configProvider = new LogConfigProvider<FileLogSettings>(settingsSource);
         }
 
@@ -41,7 +41,6 @@ namespace Vostok.Logging.Logs
 
                 while (true)
                 {
-                    //TODO(mylov): Somebody updates my settings :(
                     var settingsWereUpdated = TryUpdateSettings(ref settings);
                     try
                     {
@@ -73,11 +72,7 @@ namespace Vostok.Logging.Logs
         {
             var newSettings = configProvider.Settings;
 
-            if (newSettings.FilePath.Equals(settings.FilePath, StringComparison.CurrentCultureIgnoreCase) &&
-                newSettings.ConversionPattern.PatternStr.Equals(settings.ConversionPattern.PatternStr, StringComparison.CurrentCultureIgnoreCase) &&
-                newSettings.EnableRolling == settings.EnableRolling &&
-                newSettings.AppendToFile == settings.AppendToFile &&
-                newSettings.Encoding.Equals(settings.Encoding))
+            if (newSettings.Equals(settings))
                 return false;
 
             settings = newSettings;

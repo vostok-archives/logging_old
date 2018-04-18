@@ -2,7 +2,7 @@
 
 namespace Vostok.Logging.Configuration.SettingsSources
 {
-    internal class StaticSettingsSource<TSettings> : ISettingsSource<TSettings>
+    internal class StaticSettingsSource<TSettings> : ISettingsSource<TSettings> where TSettings : new()
     {
         public StaticSettingsSource(Func<TSettings> sourceFunc)
         {
@@ -11,7 +11,23 @@ namespace Vostok.Logging.Configuration.SettingsSources
 
         public TSettings GetSettings()
         {
-            return sourceFunc();
+            var settings = sourceFunc();
+            if (settings == null)
+                return default(TSettings);
+
+            return CloneSettings(sourceFunc());
+        }
+
+        private static TSettings CloneSettings(TSettings settings)
+        {
+            var clonedSettings = new TSettings();
+
+            foreach (var property in settings.GetType().GetProperties())
+            {
+                property.SetValue(clonedSettings, property.GetValue(settings));
+            }
+
+            return clonedSettings;
         }
 
         private readonly Func<TSettings> sourceFunc;

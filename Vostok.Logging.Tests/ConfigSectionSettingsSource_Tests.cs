@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
@@ -32,19 +33,11 @@ namespace Vostok.Logging.Tests
             settings.ConversionPattern.Should().Be(defaultSettings.ConversionPattern);
             settings.AppendToFile.Should().Be(defaultSettings.AppendToFile);
             settings.EnableRolling.Should().Be(defaultSettings.EnableRolling);
-            //var e1 = settings.Encoding;
-            //var e2 = defaultSettings.Encoding;
-            //var e1 = Encoding.GetEncoding("utf-8");
-            //var e2 = Encoding.UTF8;
-            ////e1 = Encoding.UTF8;
-            ////e2 = Encoding.UTF8;
-            //var equality = e1.Equals(e2);
-            //settings.Encoding.Should().Be(defaultSettings.Encoding);
-            settings.Encoding.BodyName.Should().Be(defaultSettings.Encoding.BodyName); //TODO(mylov): Something wrong with it :(
+            settings.Encoding.Should().Be(defaultSettings.Encoding);
         }
 
         [Test]
-        public void GetSettings_should_return_settings_with_default_string_field_if_it_is_absent() //TODO(mylov): Right logic?
+        public void GetSettings_should_return_settings_with_default_string_field_if_it_is_absent()
         {
             settingsDict.Remove("filePath");
 

@@ -12,8 +12,6 @@ namespace Vostok.Logging.Configuration
     {
         public TSettings Settings { get; private set; } = new TSettings();
 
-        private readonly Guid id = Guid.NewGuid();
-
         public LogConfigProvider(string sectionName) 
             : this(new ConfigSectionSettingsSource<TSettings>(() => new XmlConfigSection(sectionName, $"{AppDomain.CurrentDomain.FriendlyName}.config"))) { }
 
@@ -24,9 +22,9 @@ namespace Vostok.Logging.Configuration
         {
             this.settingsSource = settingsSource;
 
-            ThreadRunner.Run(() =>
+            updateCacheThread = ThreadRunner.Run(() =>
             {
-                while (true)
+                while (!isDisposed)
                 {
                     try
                     {
@@ -42,6 +40,11 @@ namespace Vostok.Logging.Configuration
             });
         }
 
+        public void Dispose()
+        {
+            isDisposed = true;
+        }
+
         private void UpdateCache()
         {
             var settings = settingsSource.GetSettings();
@@ -52,7 +55,11 @@ namespace Vostok.Logging.Configuration
                 Settings = settings;
         }
 
+        private bool isDisposed;
+
         private readonly ISettingsSource<TSettings> settingsSource;
+
+        private readonly Thread updateCacheThread;
 
         private readonly TimeSpan updateCachePeriod = 5.Seconds();
     }

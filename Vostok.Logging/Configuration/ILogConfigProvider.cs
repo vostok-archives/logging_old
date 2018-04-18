@@ -1,6 +1,8 @@
-﻿namespace Vostok.Logging.Configuration
+﻿using System;
+
+namespace Vostok.Logging.Configuration
 {
-    internal interface ILogConfigProvider<out TSettings> where TSettings : new()
+    internal interface ILogConfigProvider<out TSettings> : IDisposable where TSettings : new()
     {
         TSettings Settings { get; }
     }
