@@ -15,26 +15,20 @@ namespace Vostok.Logging.Configuration
         public LogConfigProvider(string sectionName) 
             : this(new ConfigSectionSettingsSource<TSettings>(() => new XmlConfigSection(sectionName, $"{AppDomain.CurrentDomain.FriendlyName}.config"))) { }
 
-        public LogConfigProvider(Func<TSettings> source) 
-            : this(new StaticSettingsSource<TSettings>(source)) { }
+        public LogConfigProvider(Func<TSettings> source) : this(new StaticSettingsSource<TSettings>(source))
+        {
+            TryUpdateCache();
+        }
 
         private LogConfigProvider(ISettingsSource<TSettings> settingsSource)
         {
             this.settingsSource = settingsSource;
 
-            updateCacheThread = ThreadRunner.Run(() =>
+            ThreadRunner.Run(() =>
             {
                 while (!isDisposed)
                 {
-                    try
-                    {
-                        UpdateCache();
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
-
+                    TryUpdateCache();
                     Thread.Sleep(updateCachePeriod);
                 }
             });
@@ -45,21 +39,26 @@ namespace Vostok.Logging.Configuration
             isDisposed = true;
         }
 
-        private void UpdateCache()
+        private void TryUpdateCache()
         {
-            var settings = settingsSource.GetSettings();
-            if(settings == null)
-                return;
+            try
+            { 
+                var settings = settingsSource.GetSettings();
+                if (settings == null)
+                    return;
 
-            if (settings.AreValid())
-                Settings = settings;
+                if (settings.AreValid())
+                    Settings = settings;
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
 
         private bool isDisposed;
 
         private readonly ISettingsSource<TSettings> settingsSource;
-
-        private readonly Thread updateCacheThread;
 
         private readonly TimeSpan updateCachePeriod = 5.Seconds();
     }
