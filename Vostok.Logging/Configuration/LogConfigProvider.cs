@@ -45,14 +45,24 @@ namespace Vostok.Logging.Configuration
             { 
                 var settings = settingsSource.GetSettings();
                 if (settings == null)
-                    return;
+                {
+                    if (Settings == null)
+                        Settings = new TSettings();
 
-                if (settings.AreValid())
-                    Settings = settings;
+                    return;
+                }
+
+                var validationResult = settings.Validate();
+                validationResult.EnsureSuccess();
+
+                Settings = settings;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                // ignored
+                Console.WriteLine(exception);
+
+                if (Settings == null)
+                    Settings = new TSettings();
             }
         }
 

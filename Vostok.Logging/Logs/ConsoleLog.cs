@@ -41,8 +41,9 @@ namespace Vostok.Logging.Logs
                     {
                         WriteEventsToConsole(settings);
                     }
-                    catch (Exception)
+                    catch (Exception exception)
                     {
+                        Console.WriteLine(exception);
                         Thread.Sleep(300);
                     }
 

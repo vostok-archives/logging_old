@@ -12,7 +12,7 @@ namespace Vostok.Logging.Tests
         [Test]
         public void Default_FileLogSettings_should_be_valid()
         {
-            fileLogSettings.AreValid().Should().BeTrue();
+            fileLogSettings.Validate().IsSuccessful.Should().BeTrue();
         }
 
         [Test]
@@ -20,7 +20,7 @@ namespace Vostok.Logging.Tests
         {
             fileLogSettings = null;
 
-            fileLogSettings.AreValid().Should().BeFalse();
+            fileLogSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
         [Test]
@@ -28,7 +28,7 @@ namespace Vostok.Logging.Tests
         {
             fileLogSettings.ConversionPattern = null;
 
-            fileLogSettings.AreValid().Should().BeFalse();
+            fileLogSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
         [Test]
@@ -36,7 +36,7 @@ namespace Vostok.Logging.Tests
         {
             fileLogSettings.Encoding = null;
 
-            fileLogSettings.AreValid().Should().BeFalse();
+            fileLogSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace Vostok.Logging.Tests
         {
             fileLogSettings.FilePath = null;
 
-            fileLogSettings.AreValid().Should().BeFalse();
+            fileLogSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
         [Test]
@@ -52,7 +52,7 @@ namespace Vostok.Logging.Tests
         {
             fileLogSettings.FilePath = "asdasf:asfdggasg?sadagfasdf";
 
-            fileLogSettings.AreValid().Should().BeFalse();
+            fileLogSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
         [Test]
@@ -60,14 +60,14 @@ namespace Vostok.Logging.Tests
         {
             fileLogSettings.FilePath = "C:\\HelloWorld\\Hello";
 
-            fileLogSettings.AreValid().Should().BeFalse();
+            fileLogSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
 
         [Test]
         public void Default_ConsoleLogSettings_should_be_valid()
         {
-            consoleLogSettings.AreValid().Should().BeTrue();
+            consoleLogSettings.Validate().IsSuccessful.Should().BeTrue();
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace Vostok.Logging.Tests
         {
             consoleLogSettings = null;
 
-            consoleLogSettings.AreValid().Should().BeFalse();
+            consoleLogSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
         [Test]
@@ -83,13 +83,13 @@ namespace Vostok.Logging.Tests
         {
             consoleLogSettings.ConversionPattern = null;
 
-            consoleLogSettings.AreValid().Should().BeFalse();
+            consoleLogSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
         [Test]
         public void NotSupportedSettings_should_not_be_valid()
         {
-            notSupportedSettings.AreValid().Should().BeFalse();
+            notSupportedSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
         [SetUp]

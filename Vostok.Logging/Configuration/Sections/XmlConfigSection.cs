@@ -55,9 +55,9 @@ namespace Vostok.Logging.Configuration.Sections
                     Settings = settings;
                 }
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                // ignored
+                Console.WriteLine(exception);
             }
         }
 
