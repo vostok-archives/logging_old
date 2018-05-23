@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Vostok.Commons.ThreadManagment;
 using Vostok.Logging.Configuration;
 using Vostok.Logging.Configuration.Settings;
@@ -11,13 +12,17 @@ namespace Vostok.Logging.Logs
     {
         static FileLog()
         {
-            configProvider = new LogConfigProvider<FileLogSettings>(ConfigSectionName);
-            StartNewLoggingThread();
+            Task.Run(() =>
+            {
+                Task.Delay(100).GetAwaiter().GetResult();
+                configProvider = configProvider ?? new LogConfigProvider<FileLogSettings>(ConfigSectionName);
+                StartNewLoggingThread();
+            });
         }
 
         public static void Configure(Func<FileLogSettings> settingsSource)
         {
-            configProvider.Dispose();
+            configProvider?.Dispose();
             configProvider = new LogConfigProvider<FileLogSettings>(settingsSource);
         }
 

@@ -124,9 +124,9 @@ namespace Vostok.Logging.Extensions
         public override string ToString()
         {
             if (properties == null || properties.GetType().GetProperties().Length == 0)
-                return type.ToString();
+                return $"{type}";
 
-            var propertiesStr = string.Join(",", properties.GetType().GetProperties().Select(p => $"{p.Name}={p.GetValue(properties)}"));
+            var propertiesStr = string.Join(", ", properties.GetType().GetProperties().Select(p => $"{p.Name}={p.GetValue(properties)}"));
             return $"{type}: {{{propertiesStr}}}";
 
         }
