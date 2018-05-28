@@ -1,20 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Configurations>Debug;Release</Configurations>
+    <LangVersion>7.2</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.0.0</Version>
+    <NuspecFile>Vostok.Logging.nuspec</NuspecFile>
   </PropertyGroup>
-
   <ItemGroup>
+    <PackageReference Include="ILRepack.MSBuild.Task" Version="1.0.9" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
   </ItemGroup>
-
   <ItemGroup>
-    <Reference Include="System.Configuration">
-      <HintPath>..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.1\System.Configuration.dll</HintPath>
-    </Reference>
     <Reference Include="Vostok.Commons">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\vostok.commons\Vostok.Commons\bin\Release\netstandard2.0\Vostok.Commons.dll</HintPath>
     </Reference>
   </ItemGroup>
-
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <InputAssemblies Include="$(USERPROFILE)\.nuget\packages\JetBrains.Annotations\11.1.0\lib\netstandard1.0\JetBrains.Annotations.dll" />
+      <InputAssemblies Include="$(OutputPath)\Vostok.Logging.dll" />
+    </ItemGroup>
+    <ItemGroup>
+      <DoNotInternalizeAssemblies Include="Vostok.Logging" />
+    </ItemGroup>
+    <ILRepack Parallel="true" Internalize="true" InternalizeExclude="@(DoNotInternalizeAssemblies)" InputAssemblies="@(InputAssemblies)" TargetKind="Dll" OutputFile="$(OutputPath)\Merged\$(AssemblyName).dll" />
+  </Target>
 </Project>
