@@ -22,8 +22,8 @@
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release'">
     <ItemGroup>
-      <InputAssemblies Include="$(USERPROFILE)\.nuget\packages\JetBrains.Annotations\11.1.0\lib\netstandard1.0\JetBrains.Annotations.dll" />
       <InputAssemblies Include="$(OutputPath)\Vostok.Logging.dll" />
+      <InputAssemblies Include="$(USERPROFILE)\.nuget\packages\JetBrains.Annotations\11.1.0\lib\netstandard1.0\JetBrains.Annotations.dll" />
     </ItemGroup>
     <ItemGroup>
       <DoNotInternalizeAssemblies Include="Vostok.Logging" />
