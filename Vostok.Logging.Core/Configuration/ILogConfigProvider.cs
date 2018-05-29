@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Vostok.Logging.Configuration
+namespace Vostok.Logging.Core.Configuration
 {
     internal interface ILogConfigProvider<out TSettings> : IDisposable where TSettings : new()
     {

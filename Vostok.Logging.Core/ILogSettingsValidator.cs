@@ -1,4 +1,4 @@
-﻿namespace Vostok.Logging
+﻿namespace Vostok.Logging.Core
 {
     internal interface ILogSettingsValidator<in TSettings>
     {

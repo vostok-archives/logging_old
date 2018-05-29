@@ -1,4 +1,4 @@
-﻿namespace Vostok.Logging.Configuration.Parsing
+﻿namespace Vostok.Logging.Core.Configuration.Parsing
 {
     internal static class StringParser
     {

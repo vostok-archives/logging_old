@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Vostok.Logging.Configuration.Parsing;
-using Vostok.Logging.Configuration.Sections;
+using Vostok.Logging.Core.Configuration.Parsing;
+using Vostok.Logging.Core.Configuration.Sections;
 
-namespace Vostok.Logging.Configuration.SettingsSources
+namespace Vostok.Logging.Core.Configuration.SettingsSources
 {
     internal class ConfigSectionSettingsSource<TSettings> : ISettingsSource<TSettings> where TSettings : new()
     {

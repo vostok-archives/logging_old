@@ -1,4 +1,6 @@
-﻿namespace Vostok.Logging.FileLog
+﻿using Vostok.Logging.Core;
+
+namespace Vostok.Logging.FileLog
 {
     internal static class FileLogSettingsValidatorExtensions
     {

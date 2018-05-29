@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Vostok.Logging
+namespace Vostok.Logging.Core
 {
     internal static class LogEventFormatter
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
+using Vostok.Logging.Core;
 
 namespace Vostok.Logging.Tests
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace Vostok.Logging
+namespace Vostok.Logging.Core
 {
     internal class SettingsValidationResult
     {

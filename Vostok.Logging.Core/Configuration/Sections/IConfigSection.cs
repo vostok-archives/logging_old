@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Vostok.Logging.Configuration.Sections
+namespace Vostok.Logging.Core.Configuration.Sections
 {
     internal interface IConfigSection
     {

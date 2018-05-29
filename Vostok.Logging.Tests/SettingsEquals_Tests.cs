@@ -4,8 +4,8 @@ using System.Reflection;
 using System.Text;
 using FluentAssertions;
 using NUnit.Framework;
-using Vostok.Logging.Configuration;
 using Vostok.Logging.ConsoleLog;
+using Vostok.Logging.Core.Configuration;
 using Vostok.Logging.FileLog;
 
 namespace Vostok.Logging.Tests

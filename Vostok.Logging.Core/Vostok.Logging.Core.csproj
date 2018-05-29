@@ -10,17 +10,13 @@
     <Company>SKB Kontur</Company>
     <Product>Vostok</Product>
     <Copyright>Copyright (c) 2017-2018 SKB Kontur</Copyright>
-    <PackageProjectUrl>https://github.com/vostok/logging</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/vostok/logging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/vostok/logging</PackageProjectUrl>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Vostok.Logging">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\vostok.logging\Vostok.Logging\bin\Release\netstandard2.0\Vostok.Logging.dll</HintPath>
-    </Reference>
-    <Reference Include="Vostok.Logging.Core">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\vostok.logging\Vostok.Logging.Core\bin\Release\netstandard2.0\Vostok.Logging.Core.dll</HintPath>
     </Reference>
     <Reference Include="Vostok.Commons">
       <SpecificVersion>False</SpecificVersion>

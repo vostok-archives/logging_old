@@ -2,11 +2,10 @@
 using System.Threading;
 using Vostok.Commons.Conversions;
 using Vostok.Commons.ThreadManagment;
-using Vostok.Logging.Configuration.Sections;
-using Vostok.Logging.Configuration.SettingsSources;
-using Vostok.Logging.Extensions;
+using Vostok.Logging.Core.Configuration.Sections;
+using Vostok.Logging.Core.Configuration.SettingsSources;
 
-namespace Vostok.Logging.Configuration
+namespace Vostok.Logging.Core.Configuration
 {
     internal class LogConfigProvider<TSettings> : ILogConfigProvider<TSettings> where TSettings : new()
     {

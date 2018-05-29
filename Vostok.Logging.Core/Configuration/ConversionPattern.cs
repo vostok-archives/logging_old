@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Vostok.Logging.Configuration
+namespace Vostok.Logging.Core.Configuration
 {
     public class ConversionPattern
     {

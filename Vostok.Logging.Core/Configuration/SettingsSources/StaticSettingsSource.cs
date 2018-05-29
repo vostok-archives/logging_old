@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Vostok.Logging.Configuration.SettingsSources
+namespace Vostok.Logging.Core.Configuration.SettingsSources
 {
     internal class StaticSettingsSource<TSettings> : ISettingsSource<TSettings> where TSettings : new()
     {

@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using Vostok.Commons.ThreadManagment;
-using Vostok.Logging.Configuration;
+using Vostok.Logging.Core;
+using Vostok.Logging.Core.Configuration;
 
 namespace Vostok.Logging.ConsoleLog
 {

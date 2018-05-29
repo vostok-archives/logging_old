@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
-using Vostok.Logging.Configuration.Sections;
-using Vostok.Logging.Configuration.SettingsSources;
+using Vostok.Logging.Core.Configuration.Sections;
+using Vostok.Logging.Core.Configuration.SettingsSources;
 using Vostok.Logging.FileLog;
 
 namespace Vostok.Logging.Tests

@@ -1,6 +1,5 @@
 ﻿// ReSharper disable NonReadonlyMemberInGetHashCode
-using Vostok.Logging.Configuration;
-using Vostok.Logging.Extensions;
+using Vostok.Logging.Core.Configuration;
 
 namespace Vostok.Logging.ConsoleLog
 {

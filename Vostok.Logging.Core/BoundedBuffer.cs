@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace Vostok.Logging
+namespace Vostok.Logging.Core
 {
     internal class BoundedBuffer<T> where T : class
     {

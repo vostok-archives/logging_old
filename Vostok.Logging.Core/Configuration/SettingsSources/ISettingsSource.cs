@@ -1,4 +1,4 @@
-﻿namespace Vostok.Logging.Configuration.SettingsSources
+﻿namespace Vostok.Logging.Core.Configuration.SettingsSources
 {
     internal interface ISettingsSource<out TSettings>
     {

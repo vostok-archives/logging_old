@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
-using Vostok.Logging.Configuration.SettingsSources;
+using Vostok.Logging.Core.Configuration.SettingsSources;
+
 // ReSharper disable AccessToModifiedClosure
 
 namespace Vostok.Logging.Tests

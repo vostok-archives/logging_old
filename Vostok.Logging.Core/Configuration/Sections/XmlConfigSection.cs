@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 
-namespace Vostok.Logging.Configuration.Sections
+namespace Vostok.Logging.Core.Configuration.Sections
 {
     internal class XmlConfigSection : IConfigSection
     {
