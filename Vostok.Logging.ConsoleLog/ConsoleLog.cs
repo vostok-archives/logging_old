@@ -3,21 +3,20 @@ using System.Collections.Generic;
 using System.Threading;
 using Vostok.Commons.ThreadManagment;
 using Vostok.Logging.Configuration;
-using Vostok.Logging.Configuration.Settings;
 
-namespace Vostok.Logging.Logs
+namespace Vostok.Logging.ConsoleLog
 {
     public class ConsoleLog : ILog
     {
         static ConsoleLog()
         {
-            configProvider = new LogConfigProvider<ConsoleLogSettings>(ConfigSectionName);
+            configProvider = new LogConfigProvider<ConsoleLogSettings>(ConfigSectionName, new ConsoleLogSettingsValidator());
             StartNewLoggingThread();
         }
 
         public void Configure(Func<ConsoleLogSettings> settingsSource)
         {
-            configProvider = new LogConfigProvider<ConsoleLogSettings>(settingsSource);
+            configProvider = new LogConfigProvider<ConsoleLogSettings>(settingsSource, new ConsoleLogSettingsValidator());
         }
 
         public void Log(LogEvent @event)

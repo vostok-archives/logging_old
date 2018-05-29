@@ -19,7 +19,7 @@ namespace Vostok.Logging.Configuration.SettingsSources
 
             var section = createSection();
             if (section == null || section.Settings.Count == 0)
-                return default(TSettings);
+                return default;
 
             var properties = typeof(TSettings).GetProperties();
             foreach (var property in properties)
@@ -27,10 +27,10 @@ namespace Vostok.Logging.Configuration.SettingsSources
                 if (section.Settings.TryGetValue(property.Name, out var setting))
                 {
                     if (!inlineParsers.TryGetValue(property.PropertyType, out var parser))
-                        return default(TSettings);
+                        return default;
 
                     if (!parser.TryParse(setting, out var parsedSetting))
-                        return default(TSettings);
+                        return default;
 
                     property.SetValue(settings, parsedSetting);
                 }

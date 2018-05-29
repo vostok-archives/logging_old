@@ -13,7 +13,7 @@ namespace Vostok.Logging.Configuration.SettingsSources
         {
             var settings = sourceFunc();
             if (settings == null)
-                return default(TSettings);
+                return default;
 
             return CloneSettings(sourceFunc());
         }

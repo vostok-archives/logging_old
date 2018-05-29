@@ -4,9 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Vostok.Commons.ThreadManagment;
 using Vostok.Logging.Configuration;
-using Vostok.Logging.Configuration.Settings;
 
-namespace Vostok.Logging.Logs
+namespace Vostok.Logging.FileLog
 {
     public class FileLog : ILog
     {
@@ -15,7 +14,7 @@ namespace Vostok.Logging.Logs
             Task.Run(() =>
             {
                 Task.Delay(100).GetAwaiter().GetResult();
-                configProvider = configProvider ?? new LogConfigProvider<FileLogSettings>(ConfigSectionName);
+                configProvider = configProvider ?? new LogConfigProvider<FileLogSettings>(ConfigSectionName, new FileLogSettingsValidator());
                 StartNewLoggingThread();
             });
         }
@@ -23,7 +22,7 @@ namespace Vostok.Logging.Logs
         public static void Configure(Func<FileLogSettings> settingsSource)
         {
             configProvider?.Dispose();
-            configProvider = new LogConfigProvider<FileLogSettings>(settingsSource);
+            configProvider = new LogConfigProvider<FileLogSettings>(settingsSource, new FileLogSettingsValidator());
         }
 
         public void Log(LogEvent @event)

@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using FluentAssertions;
 using NUnit.Framework;
-using Vostok.Logging.Configuration.Settings;
-using Vostok.Logging.Extensions;
+using Vostok.Logging.ConsoleLog;
+using Vostok.Logging.FileLog;
 
 namespace Vostok.Logging.Tests
 {
@@ -63,7 +63,6 @@ namespace Vostok.Logging.Tests
             fileLogSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
-
         [Test]
         public void Default_ConsoleLogSettings_should_be_valid()
         {
@@ -86,31 +85,18 @@ namespace Vostok.Logging.Tests
             consoleLogSettings.Validate().IsSuccessful.Should().BeFalse();
         }
 
-        [Test]
-        public void NotSupportedSettings_should_not_be_valid()
-        {
-            notSupportedSettings.Validate().IsSuccessful.Should().BeFalse();
-        }
-
         [SetUp]
         public void SetUp()
         {
             fileLogSettings = new FileLogSettings();
             consoleLogSettings = new ConsoleLogSettings();
-            notSupportedSettings = new NotSupportedSettings();
 
             var logDirectoryPath = fileLogSettings.FilePath;
-            if(!Directory.Exists(Path.GetDirectoryName(logDirectoryPath)))
+            if (!Directory.Exists(Path.GetDirectoryName(logDirectoryPath)))
                 Directory.CreateDirectory(Path.GetDirectoryName(logDirectoryPath));
         }
 
         private FileLogSettings fileLogSettings;
         private ConsoleLogSettings consoleLogSettings;
-        private NotSupportedSettings notSupportedSettings;
-
-        private class NotSupportedSettings
-        {
-            public int NotSupportedSetting { get; set; } = 4;
-        }
     }
 }

@@ -12,17 +12,20 @@ namespace Vostok.Logging.Configuration
     {
         public TSettings Settings { get; private set; } = new TSettings();
 
-        public LogConfigProvider(string sectionName) 
-            : this(new ConfigSectionSettingsSource<TSettings>(() => new XmlConfigSection(sectionName, $"{AppDomain.CurrentDomain.FriendlyName}.config"))) { }
+        public LogConfigProvider(string sectionName, ILogSettingsValidator<TSettings> settingsValidator)
+            : this(new ConfigSectionSettingsSource<TSettings>(() => new XmlConfigSection(sectionName, $"{AppDomain.CurrentDomain.FriendlyName}.config")),
+                settingsValidator) { }
 
-        public LogConfigProvider(Func<TSettings> source) : this(new StaticSettingsSource<TSettings>(source))
-        {
-            TryUpdateCache();
-        }
+        public LogConfigProvider(Func<TSettings> source, ILogSettingsValidator<TSettings> settingsValidator) 
+            : this(new StaticSettingsSource<TSettings>(source), 
+                settingsValidator) { }
 
-        private LogConfigProvider(ISettingsSource<TSettings> settingsSource)
+        private LogConfigProvider(ISettingsSource<TSettings> settingsSource, ILogSettingsValidator<TSettings> settingsValidator)
         {
             this.settingsSource = settingsSource;
+            this.settingsValidator = settingsValidator;
+
+            TryUpdateCache();
 
             ThreadRunner.Run(() =>
             {
@@ -52,7 +55,7 @@ namespace Vostok.Logging.Configuration
                     return;
                 }
 
-                var validationResult = settings.Validate();
+                var validationResult = settingsValidator.Validate(settings);
                 validationResult.EnsureSuccess();
 
                 Settings = settings;
@@ -69,6 +72,7 @@ namespace Vostok.Logging.Configuration
         private bool isDisposed;
 
         private readonly ISettingsSource<TSettings> settingsSource;
+        private readonly ILogSettingsValidator<TSettings> settingsValidator;
 
         private readonly TimeSpan updateCachePeriod = 5.Seconds();
     }

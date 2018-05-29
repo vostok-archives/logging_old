@@ -1,4 +1,4 @@
-﻿namespace Vostok.Logging.Logs
+﻿namespace Vostok.Logging
 {
     public class SilentLog : ILog
     {

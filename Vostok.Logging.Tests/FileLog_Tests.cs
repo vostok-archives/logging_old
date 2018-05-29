@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
 using Vostok.Logging.Configuration;
-using Vostok.Logging.Configuration.Settings;
 using Vostok.Logging.Extensions;
-using Vostok.Logging.Logs;
+using Vostok.Logging.FileLog;
 
 namespace Vostok.Logging.Tests
 {
@@ -185,7 +184,7 @@ namespace Vostok.Logging.Tests
 
         private static void UpdateSettings(FileLogSettings settingsPatch)
         {
-            FileLog.Configure(() => settingsPatch);
+            FileLog.FileLog.Configure(() => settingsPatch);
             WaitForOperationCanceled();
         }
 
@@ -210,7 +209,7 @@ namespace Vostok.Logging.Tests
 
         private FileLogSettings settings;
 
-        private readonly FileLog log = new FileLog();
+        private readonly FileLog.FileLog log = new FileLog.FileLog();
         private readonly List<string> createdFiles = new List<string>(2);
     }
 }

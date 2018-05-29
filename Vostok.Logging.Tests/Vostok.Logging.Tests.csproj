@@ -13,6 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Vostok.Logging.ConsoleLog\Vostok.Logging.ConsoleLog.csproj" />
+    <ProjectReference Include="..\Vostok.Logging.FileLog\Vostok.Logging.FileLog.csproj" />
     <ProjectReference Include="..\Vostok.Logging\Vostok.Logging.csproj" />
   </ItemGroup>
 

@@ -2,11 +2,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Configurations>Debug;Release</Configurations>
-    <LangVersion>7.2</LangVersion>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.0</Version>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Vostok.Logging\Vostok.Logging.csproj" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="Vostok.Commons">
       <SpecificVersion>False</SpecificVersion>

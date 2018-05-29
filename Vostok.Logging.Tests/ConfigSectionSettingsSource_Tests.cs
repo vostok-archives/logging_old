@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Vostok.Logging.Configuration.Sections;
-using Vostok.Logging.Configuration.Settings;
 using Vostok.Logging.Configuration.SettingsSources;
+using Vostok.Logging.FileLog;
 
 namespace Vostok.Logging.Tests
 {

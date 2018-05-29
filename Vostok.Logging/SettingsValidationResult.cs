@@ -1,65 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using Vostok.Logging.Configuration.Settings;
 
-namespace Vostok.Logging.Extensions
+namespace Vostok.Logging
 {
-    internal static class SettingsValidator
-    {
-        public static SettingsValidationResult Validate<TSettings>(this TSettings settings)
-        {
-            if (typeof (TSettings) == typeof (FileLogSettings))
-                return Validate(settings as FileLogSettings);
-
-            if (typeof(TSettings) == typeof(ConsoleLogSettings))
-                return Validate(settings as ConsoleLogSettings);
-
-            return SettingsValidationResult.NotSupportedSettingsType(typeof(TSettings));
-        }
-
-        public static SettingsValidationResult Validate(this FileLogSettings settings)
-        {
-            if (settings?.Encoding == null)
-                return SettingsValidationResult.EncodingIsNull();
-
-            if (settings.ConversionPattern == null)
-                return SettingsValidationResult.ConversionPatternIsNull();
-
-            return FilePathIsValid(settings.FilePath);
-        }
-
-        public static SettingsValidationResult Validate(this ConsoleLogSettings settings)
-        {
-            if (settings?.ConversionPattern == null)
-                return SettingsValidationResult.ConversionPatternIsNull();
-
-            return SettingsValidationResult.Success();
-        }
-
-        private static SettingsValidationResult FilePathIsValid(string filePath)
-        {
-            if (string.IsNullOrWhiteSpace(filePath))
-                return SettingsValidationResult.FilePathIsNullOrEmpty();
-
-            string fullPath;
-            try
-            {
-                fullPath = Path.GetFullPath(filePath);
-            }
-            catch (NotSupportedException exception)
-            {
-                return SettingsValidationResult.FilePathIsNotCorrect(filePath, exception);
-            }
-
-            var directoryName = Path.GetDirectoryName(fullPath);
-            if (!Directory.Exists(directoryName))
-                return SettingsValidationResult.DirectoryNotFound(directoryName);
-
-            return SettingsValidationResult.Success();
-        }
-    }
-
     internal class SettingsValidationResult
     {
         public bool IsSuccessful => type == ValidationResultType.Success;
