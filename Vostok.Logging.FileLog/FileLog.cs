@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Vostok.Commons.ThreadManagment;
+using Vostok.Logging.Abstractions;
 using Vostok.Logging.Core;
 using Vostok.Logging.Core.Configuration;
 

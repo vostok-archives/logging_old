@@ -15,16 +15,17 @@ namespace Vostok.Logging.Core.Configuration
             : this(new ConfigSectionSettingsSource<TSettings>(() => new XmlConfigSection(sectionName, $"{AppDomain.CurrentDomain.FriendlyName}.config")),
                 settingsValidator) { }
 
-        public LogConfigProvider(Func<TSettings> source, ILogSettingsValidator<TSettings> settingsValidator) 
-            : this(new StaticSettingsSource<TSettings>(source), 
-                settingsValidator) { }
+        public LogConfigProvider(Func<TSettings> source, ILogSettingsValidator<TSettings> settingsValidator)
+            : this(new StaticSettingsSource<TSettings>(source),
+                settingsValidator)
+        {
+            TryUpdateCache();
+        }
 
         private LogConfigProvider(ISettingsSource<TSettings> settingsSource, ILogSettingsValidator<TSettings> settingsValidator)
         {
             this.settingsSource = settingsSource;
             this.settingsValidator = settingsValidator;
-
-            TryUpdateCache();
 
             ThreadRunner.Run(() =>
             {

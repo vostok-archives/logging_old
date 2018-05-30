@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace Vostok.Logging.Extensions
+namespace Vostok.Logging.Abstractions.Extensions
 {
     public static class LogExtensions
     {

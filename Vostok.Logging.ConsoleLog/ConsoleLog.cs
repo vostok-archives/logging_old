@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Vostok.Commons.ThreadManagment;
+using Vostok.Logging.Abstractions;
 using Vostok.Logging.Core;
 using Vostok.Logging.Core.Configuration;
 
@@ -11,12 +13,17 @@ namespace Vostok.Logging.ConsoleLog
     {
         static ConsoleLog()
         {
-            configProvider = new LogConfigProvider<ConsoleLogSettings>(ConfigSectionName, new ConsoleLogSettingsValidator());
-            StartNewLoggingThread();
+            Task.Run(() =>
+                {
+                    Task.Delay(100).GetAwaiter().GetResult();
+                    configProvider = configProvider ?? new LogConfigProvider<ConsoleLogSettings>(ConfigSectionName, new ConsoleLogSettingsValidator());
+                    StartNewLoggingThread();
+                });
         }
 
-        public void Configure(Func<ConsoleLogSettings> settingsSource)
+        public static void Configure(Func<ConsoleLogSettings> settingsSource)
         {
+            configProvider?.Dispose();
             configProvider = new LogConfigProvider<ConsoleLogSettings>(settingsSource, new ConsoleLogSettingsValidator());
         }
 

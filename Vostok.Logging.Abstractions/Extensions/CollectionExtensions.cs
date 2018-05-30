@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Vostok.Logging.Extensions
+namespace Vostok.Logging.Abstractions.Extensions
 {
     internal static class CollectionExtensions
     {

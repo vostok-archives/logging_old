@@ -4,7 +4,9 @@ using System.Linq;
 using System.Reflection;
 using NSubstitute;
 using NUnit.Framework;
-using Vostok.Logging.Extensions;
+using Vostok.Logging.Abstractions;
+using Vostok.Logging.Abstractions.Extensions;
+
 #pragma warning disable 612
 
 namespace Vostok.Logging.Tests
