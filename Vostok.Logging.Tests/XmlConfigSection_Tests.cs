@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using FluentAssertions;
 using NUnit.Framework;
-using Vostok.Logging.Abstractions.Extensions;
 using Vostok.Logging.Core.Configuration.Sections;
+using Vostok.Logging.Abstractions;
 
 namespace Vostok.Logging.Tests
 {

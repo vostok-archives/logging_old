@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
-using Vostok.Logging.Abstractions.Extensions;
+using Vostok.Logging.Abstractions;
 using Vostok.Logging.ConsoleLog;
 using Vostok.Logging.Core.Configuration;
 using Vostok.Logging.FileLog;

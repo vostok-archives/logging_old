@@ -5,7 +5,6 @@ using System.Reflection;
 using NSubstitute;
 using NUnit.Framework;
 using Vostok.Logging.Abstractions;
-using Vostok.Logging.Abstractions.Extensions;
 
 #pragma warning disable 612
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Vostok.Logging.Abstractions.Extensions
+namespace Vostok.Logging.Abstractions
 {
     public static class LogEventExtensions
     {
