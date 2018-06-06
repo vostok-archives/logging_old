@@ -12,6 +12,6 @@
     <copyright>Copyright (c) 2017-2018 SKB Kontur</copyright>
   </metadata>
   <files>
-    <file src="bin\Release\netstandard2.0\Vostok.Logging.Abstractions.dll" target="lib\netstandard2.0\" />
+    <file src="bin\Release\netstandard2.0\*" target="lib\netstandard2.0\" />
   </files>
 </package>
