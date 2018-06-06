@@ -4,9 +4,9 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Vostok.Logging.Core
+namespace Vostok.Logging.Abstractions
 {
-    internal static class LogEventFormatter
+    public static class LogEventFormatter
     {
         public static string FormatMessage(string template, IReadOnlyDictionary<string, object> properties)
         {
