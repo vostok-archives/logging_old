@@ -6,7 +6,7 @@ namespace Vostok.Logging.Abstractions
 {
     public static class LogEventExtensions
     {
-        public static LogEvent SetProperty<T>(this LogEvent @event, string key, T value)
+        public static LogEvent WithProperty<T>(this LogEvent @event, string key, T value)
         {
             Dictionary<string, object> properties;
 
