@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,7 +22,7 @@ namespace Vostok.Logging.Abstractions
                 {
                     properties = @event.Properties
                         .Concat(new []{ new KeyValuePair<string, object>(key, value) })
-                        .ToDictionary(p => p.Key, p => p.Value);
+                        .ToDictionary(p => p.Key, p => p.Value, StringComparer.CurrentCultureIgnoreCase);
                 }
             }
             else
