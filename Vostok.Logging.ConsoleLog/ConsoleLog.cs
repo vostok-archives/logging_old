@@ -36,6 +36,7 @@ namespace Vostok.Logging.ConsoleLog
         }
 
         public bool IsEnabledFor(LogLevel level) => true;
+        public ILog ForContext(string context) => this;
 
         private static void StartNewLoggingThread()
         {
