@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,6 +6,10 @@ namespace Vostok.Logging.Abstractions
 {
     public static class LogEventExtensions
     {
+        /// <summary>
+        /// <para>Returns a copy of <paramref name="@event"/> with property <paramref name="key"/> set to <paramref name="value"/>.</para>
+        /// <para>Values of existing properties can be replaced this way.</para>
+        /// </summary>
         public static LogEvent WithProperty<T>(this LogEvent @event, string key, T value)
         {
             Dictionary<string, object> properties;

@@ -3,9 +3,15 @@ using JetBrains.Annotations;
 
 namespace Vostok.Logging.Abstractions
 {
+    // TODO(krait): Copy-paste XML docs.
     public static class LogExtensions
     {
         #region Debug
+
+        /// <summary>
+        /// <para>Logs the provided log message on the <see cref="LogLevel.Debug"/> log level.</para>
+        /// <para>Does nothing if the <see cref="LogLevel.Debug"/> log level is disabled for the current logger.</para>
+        /// </summary>
         public static void Debug(this ILog log, string message)
         {
             log.Log(new LogEvent(LogLevel.Debug, DateTimeOffset.UtcNow, message));

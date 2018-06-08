@@ -6,8 +6,22 @@ using System.Text;
 
 namespace Vostok.Logging.Abstractions
 {
+    /// <summary>
+    /// The formatter used to fill log message templates with property and parameter values.
+    /// </summary>
     public static class LogEventFormatter
     {
+        /// <summary>
+        /// <para>Substitutes placeholders in <paramref name="template"/> with the actual property values from the given dictionary.</para>
+        /// <para>The dictionary contains both named properties and unnamed parameters.</para>
+        /// <list type="bullet">
+        ///     <listheader>Substitution rules:</listheader>
+        ///     <item>{name} will be replaced with the value of property 'name'.</item>
+        ///     <item>{0} will be replaced with the first of the unnamed parameters.</item>
+        ///     <item>Use {{ and }} to escape curly braces in <paramref name="template"/>.</item>
+        ///     <item>Placeholders for nonexistent properties and invalid placeholders are not replaced.</item>
+        /// </list>
+        /// </summary>
         public static string FormatMessage(string template, IReadOnlyDictionary<string, object> properties)
         {
             if (template == null)
