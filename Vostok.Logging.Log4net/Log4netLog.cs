@@ -1,5 +1,4 @@
-﻿using System;
-using log4net.Core;
+﻿using log4net.Core;
 using Vostok.Logging.Abstractions;
 using ILog = Vostok.Logging.Abstractions.ILog;
 
@@ -8,18 +7,16 @@ namespace Vostok.Logging.Log4net
     public class Log4netLog : ILog
     {
         private readonly ILogger logger;
-        private readonly string context;
         private readonly bool useContextHierarchy;
 
-        public Log4netLog(log4net.ILog log, string context = null, bool useContextHierarchy = true)
-            : this(log.Logger, context, useContextHierarchy)
+        public Log4netLog(log4net.ILog log, bool useContextHierarchy = false)
+            : this(log.Logger, useContextHierarchy)
         {
         }
 
-        private Log4netLog(ILogger logger, string context, bool useContextHierarchy)
+        private Log4netLog(ILogger logger, bool useContextHierarchy)
         {
             this.logger = logger;
-            this.context = context ?? "";
             this.useContextHierarchy = useContextHierarchy;
         }
 
@@ -27,62 +24,31 @@ namespace Vostok.Logging.Log4net
         {
             if (!IsEnabledFor(@event.Level))
                 return;
-            logger.Log(TranslateEvent(@event));
-        }
-
-        private LoggingEvent TranslateEvent(LogEvent @event)
-        {
-            var loggingEvent = new LoggingEvent(
-                null,
-                null,
-                logger.Name,
-                TranslateLevel(@event.Level),
-                LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties), @event.Exception);
-            // todo create loggingEventData manually - just to set timestamp correctly
-            foreach (var property in @event.Properties)
-                loggingEvent.Properties[property.Key] = property.Value;
-            return loggingEvent;
-        }
-
-        private Level TranslateLevel(LogLevel level)
-        {
-            switch (level)
-            {
-                case LogLevel.Debug:
-                    return Level.Debug;
-                case LogLevel.Info:
-                    return Level.Info;
-                case LogLevel.Warn:
-                    return Level.Warn;
-                case LogLevel.Error:
-                    return Level.Error;
-                case LogLevel.Fatal:
-                    return Level.Fatal;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(level), level, null);
-            }
+            logger.Log(Log4netHelpers.TranslateEvent(logger, @event));
         }
 
         public bool IsEnabledFor(LogLevel level)
         {
-            return logger.IsEnabledFor(TranslateLevel(level));
+            return logger.IsEnabledFor(Log4netHelpers.TranslateLevel(level));
         }
 
         public ILog ForContext(string context)
         {
-            var childContext = GetChildContext(context);
-            if (childContext == this.context)
+            var loggerName = GetLoggerNameForContext(context);
+            if (loggerName == logger.Name)
                 return this;
-            return new Log4netLog(logger.Repository.GetLogger(childContext), childContext, useContextHierarchy);
+            return new Log4netLog(logger.Repository.GetLogger(loggerName), useContextHierarchy);
         }
 
-        private string GetChildContext(string context)
+        private string GetLoggerNameForContext(string context)
         {
-            if (!useContextHierarchy || string.IsNullOrEmpty(this.context))
-                return context ?? "";
+            if (!useContextHierarchy)
+                return string.IsNullOrEmpty(context) ? "root" : context;
             if (string.IsNullOrEmpty(context))
-                return this.context;
-            return $"{this.context}.{context}";
+                return logger.Name;
+            if (logger.Name == "root")
+                return context;
+            return $"{logger.Name}.{context}";
         }
     }
 }
