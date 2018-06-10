@@ -32,7 +32,8 @@
 
             public ILog ForContext(string context)
             {
-                return new WithPropertyLog<T>(baseLog.ForContext(context), key, value);
+                var baseLogForContext = baseLog.ForContext(context);
+                return baseLogForContext == baseLog ? this : new WithPropertyLog<T>(baseLogForContext, key, value);
             }
         }
     }

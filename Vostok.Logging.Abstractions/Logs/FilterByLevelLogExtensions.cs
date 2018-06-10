@@ -31,7 +31,8 @@
 
             public ILog ForContext(string context)
             {
-                return new FilterByLevelLog(baseLog.ForContext(context), minLevel);
+                var baseLogForContext = baseLog.ForContext(context);
+                return baseLogForContext == baseLog ? this : new FilterByLevelLog(baseLogForContext, minLevel);
             }
         }
     }

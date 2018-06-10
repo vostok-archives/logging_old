@@ -8,15 +8,19 @@ namespace Vostok.Logging.Log4net
     public class Log4netLog : ILog
     {
         private readonly ILogger logger;
+        private readonly string context;
+        private readonly bool useContextHierarchy;
 
-        public Log4netLog(log4net.ILog log)
-            : this(log.Logger)
+        public Log4netLog(log4net.ILog log, string context = null, bool useContextHierarchy = true)
+            : this(log.Logger, context, useContextHierarchy)
         {
         }
 
-        private Log4netLog(ILogger logger)
+        private Log4netLog(ILogger logger, string context, bool useContextHierarchy)
         {
             this.logger = logger;
+            this.context = context ?? "";
+            this.useContextHierarchy = useContextHierarchy;
         }
 
         public void Log(LogEvent @event)
@@ -66,7 +70,19 @@ namespace Vostok.Logging.Log4net
 
         public ILog ForContext(string context)
         {
-            return new Log4netLog(logger.Repository.GetLogger(context));
+            var childContext = GetChildContext(context);
+            if (childContext == this.context)
+                return this;
+            return new Log4netLog(logger.Repository.GetLogger(childContext), childContext, useContextHierarchy);
+        }
+
+        private string GetChildContext(string context)
+        {
+            if (!useContextHierarchy || string.IsNullOrEmpty(this.context))
+                return context ?? "";
+            if (string.IsNullOrEmpty(context))
+                return this.context;
+            return $"{this.context}.{context}";
         }
     }
 }
