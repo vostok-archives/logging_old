@@ -43,10 +43,10 @@ namespace Vostok.Logging.Log4net
         private string GetLoggerNameForContext(string context)
         {
             if (!useContextHierarchy)
-                return string.IsNullOrEmpty(context) ? "root" : context;
+                return context ?? "";
             if (string.IsNullOrEmpty(context))
                 return logger.Name;
-            if (logger.Name == "root")
+            if (logger.Name == "")
                 return context;
             return $"{logger.Name}.{context}";
         }

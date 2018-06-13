@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using log4net.Core;
 using log4net.Repository.Hierarchy;
 using log4net.Util;
@@ -30,9 +31,7 @@ namespace Vostok.Logging.Log4net
         public static LoggingEvent TranslateEvent(ILogger logger, LogEvent @event)
         {
             var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
-            var properties = new PropertiesDictionary();
-            foreach (var kvp in @event.Properties)
-                properties[kvp.Key] = kvp.Value;
+            var properties = TranslateProperties(@event.Properties);
             var loggingEventData = new LoggingEventData
             {
                 Level = TranslateLevel(@event.Level),
@@ -43,6 +42,17 @@ namespace Vostok.Logging.Log4net
                 LoggerName = logger.Name
             };
             return new LoggingEvent(typeof(Logger), logger.Repository, loggingEventData);
+        }
+
+        private static PropertiesDictionary TranslateProperties(IReadOnlyDictionary<string, object> readOnlyDictionary)
+        {
+            if (readOnlyDictionary == null)
+                return null;
+
+            var properties = new PropertiesDictionary();
+            foreach (var kvp in readOnlyDictionary)
+                properties[kvp.Key] = kvp.Value;
+            return properties;
         }
     }
 }
