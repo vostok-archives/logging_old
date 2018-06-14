@@ -12,10 +12,10 @@ using Vostok.Logging.Log4net;
 namespace Vostok.Logging.Tests
 {
     [TestFixture]
-    internal class Log4netLog_Tests
+    internal class Log4netHierarchicalLog_Tests
     {
         [Test]
-        public void Log4netLog_should_log_messages()
+        public void Log4netHierarchicalLog_should_log_messages()
         {
             var messages = new[] { "Hello, World 1", "Hello, World 2" };
             
@@ -26,16 +26,27 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void Log4netLog_should_use_context_as_logger_name()
+        public void Log4netHierarchicalLog_should_use_context_as_logger_name()
         {
             var contexts = new[] { "lalala", "bububu" };
+            var fullContexts = new[] { $"{rootContext}.lalala", $"{rootContext}.bububu" };
             log.ForContext(contexts[0]).Info("msg1");
             log.ForContext(contexts[1]).Info("msg2");
-            appender.GetEvents().Select(x => x.LoggerName).Should().Equal(contexts);
+            appender.GetEvents().Select(x => x.LoggerName).Should().Equal(fullContexts);
         }
 
         [Test]
-        public void Log4netLog_should_create_events_with_correct_timestamp()
+        public void Log4netHierarchicalLog_with_hierarchy_should_use_context_as_logger_name()
+        {
+            log.ForContext("lalala").ForContext("bububu").Info("msg1");
+            log.ForContext("lalala").ForContext("mimimi").Info("msg2");
+            appender.GetEvents().Select(x => x.LoggerName).Should().Equal(
+                $"{rootContext}.lalala.bububu",
+                $"{rootContext}.lalala.mimimi");
+        }
+
+        [Test]
+        public void Log4netHierarchicalLog_should_create_events_with_correct_timestamp()
         {
             var timestamp = DateTimeOffset.UtcNow.AddDays(1);
             log.Log(new LogEvent(LogLevel.Info, timestamp, "lalala"));
@@ -43,7 +54,7 @@ namespace Vostok.Logging.Tests
         }
 
         [TestCaseSource(nameof(GetLevelsMap))]
-        public void Log4netLog_should_translate_level_correctly(LogLevel level, Level log4netLevel)
+        public void Log4netHierarchicalLog_should_translate_level_correctly(LogLevel level, Level log4netLevel)
         {
             log.Log(new LogEvent(level, DateTimeOffset.UtcNow, "lalala"));
             appender.GetEvents().Single().Level.Should().Be(log4netLevel);
@@ -68,10 +79,11 @@ namespace Vostok.Logging.Tests
             repository.ResetConfiguration();
             appender = new MemoryAppender();
             BasicConfigurator.Configure(repository, appender);
-            log = new Log4netLog(LogManager.GetLogger("test", "root"));
+            log = new Log4netHierarchicalLog(LogManager.GetLogger("test", rootContext));
         }
 
         private MemoryAppender appender;
         private Abstractions.ILog log;
+        private const string rootContext = "base";
     }
 }

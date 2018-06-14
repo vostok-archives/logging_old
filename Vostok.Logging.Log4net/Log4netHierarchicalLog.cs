@@ -1,19 +1,18 @@
 ﻿using log4net.Core;
 using Vostok.Logging.Abstractions;
-using ILog = Vostok.Logging.Abstractions.ILog;
 
 namespace Vostok.Logging.Log4net
 {
-    public class Log4netLog : ILog
+    public class Log4netHierarchicalLog : ILog
     {
         private readonly ILogger logger;
-
-        public Log4netLog(log4net.ILog log)
+        
+        public Log4netHierarchicalLog(log4net.ILog log)
             : this(log.Logger)
         {
         }
 
-        private Log4netLog(ILogger logger)
+        private Log4netHierarchicalLog(ILogger logger)
         {
             this.logger = logger;
         }
@@ -32,8 +31,19 @@ namespace Vostok.Logging.Log4net
 
         public ILog ForContext(string context)
         {
-            var loggerName = context ?? "";
-            return loggerName == logger.Name ? this : new Log4netLog(logger.Repository.GetLogger(loggerName));
+            var loggerName = GetLoggerNameForContext(context);
+            if (loggerName == logger.Name)
+                return this;
+            return new Log4netHierarchicalLog(logger.Repository.GetLogger(loggerName));
+        }
+
+        private string GetLoggerNameForContext(string context)
+        {
+            if (string.IsNullOrEmpty(context))
+                return logger.Name;
+            if (logger.Name == "")
+                return context;
+            return $"{logger.Name}.{context}";
         }
     }
 }
