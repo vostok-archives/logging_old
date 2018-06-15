@@ -1,4 +1,5 @@
-﻿using log4net.Core;
+﻿using System;
+using log4net.Core;
 using Vostok.Logging.Abstractions;
 
 namespace Vostok.Logging.Log4net
@@ -31,19 +32,10 @@ namespace Vostok.Logging.Log4net
 
         public ILog ForContext(string context)
         {
-            var loggerName = GetLoggerNameForContext(context);
-            if (loggerName == logger.Name)
-                return this;
-            return new Log4netHierarchicalLog(logger.Repository.GetLogger(loggerName));
-        }
-
-        private string GetLoggerNameForContext(string context)
-        {
             if (string.IsNullOrEmpty(context))
-                return logger.Name;
-            if (logger.Name == "")
-                return context;
-            return $"{logger.Name}.{context}";
+                throw new ArgumentException("Empty context is not allowed", nameof(context));
+            var loggerName = $"{logger.Name}-{context}";
+            return new Log4netHierarchicalLog(logger.Repository.GetLogger(loggerName));
         }
     }
 }

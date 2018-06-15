@@ -14,6 +14,13 @@ namespace Vostok.Logging.Tests
     [TestFixture]
     internal class Log4netHierarchicalLog_Tests
     {
+        [TestCase("")]
+        [TestCase(null)]
+        public void Log4netHierarchicalLog_should_throw_ArgumentException_on_empty_context(string context)
+        {
+            Assert.Throws<ArgumentException>(() => log.ForContext(context));
+        }
+
         [Test]
         public void Log4netHierarchicalLog_should_log_messages()
         {
@@ -29,7 +36,7 @@ namespace Vostok.Logging.Tests
         public void Log4netHierarchicalLog_should_use_context_as_logger_name()
         {
             var contexts = new[] { "lalala", "bububu" };
-            var fullContexts = new[] { $"{rootContext}.lalala", $"{rootContext}.bububu" };
+            var fullContexts = new[] { $"{rootContext}-lalala", $"{rootContext}-bububu" };
             log.ForContext(contexts[0]).Info("msg1");
             log.ForContext(contexts[1]).Info("msg2");
             appender.GetEvents().Select(x => x.LoggerName).Should().Equal(fullContexts);
@@ -41,8 +48,8 @@ namespace Vostok.Logging.Tests
             log.ForContext("lalala").ForContext("bububu").Info("msg1");
             log.ForContext("lalala").ForContext("mimimi").Info("msg2");
             appender.GetEvents().Select(x => x.LoggerName).Should().Equal(
-                $"{rootContext}.lalala.bububu",
-                $"{rootContext}.lalala.mimimi");
+                $"{rootContext}-lalala-bububu",
+                $"{rootContext}-lalala-mimimi");
         }
 
         [Test]

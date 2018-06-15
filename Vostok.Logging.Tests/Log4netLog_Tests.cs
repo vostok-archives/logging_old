@@ -14,6 +14,13 @@ namespace Vostok.Logging.Tests
     [TestFixture]
     internal class Log4netLog_Tests
     {
+        [TestCase("")]
+        [TestCase(null)]
+        public void Log4netLog_should_throw_ArgumentException_on_empty_context(string context)
+        {
+            Assert.Throws<ArgumentException>(() => log.ForContext(context));
+        }
+
         [Test]
         public void Log4netLog_should_log_messages()
         {
