@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,6 +14,7 @@ namespace Vostok.Logging.Abstractions
             {
                 if (@event.Properties.ContainsKey(key))
                 {
+                    // CR(Mansiper): Why not just cast?     properties = (Dictionary<string, object>)@event.Properties;
                     properties = @event.Properties.ToDictionary(p => p.Key, p => p.Value, StringComparer.CurrentCultureIgnoreCase);
                     properties[key] = value;
                 }
