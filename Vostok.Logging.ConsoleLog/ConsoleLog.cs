@@ -9,12 +9,14 @@ using Vostok.Logging.Core.Configuration;
 
 namespace Vostok.Logging.ConsoleLog
 {
+    // CR(krait): Most of the comments also apply to FileLog.
     public class ConsoleLog : ILog
     {
         static ConsoleLog()
         {
             Task.Run(() =>
                 {
+                    // CR(krait): This delay looks very suspicious. What is it for?
                     Task.Delay(100).GetAwaiter().GetResult();
                     configProvider = configProvider ?? new LogConfigProvider<ConsoleLogSettings>(ConfigSectionName, new ConsoleLogSettingsValidator());
                     StartNewLoggingThread();
@@ -39,6 +41,7 @@ namespace Vostok.Logging.ConsoleLog
 
         private static void StartNewLoggingThread()
         {
+            // CR(krait): Let's not waste a thread for this. We can run it on the thread pool and use `await Task.Delay` to sleep, thus releasing the thread when unused.
             ThreadRunner.Run(() => 
             {
                 while (true)
@@ -50,7 +53,7 @@ namespace Vostok.Logging.ConsoleLog
                     }
                     catch (Exception exception)
                     {
-                        Console.WriteLine(exception);
+                        Console.WriteLine(exception); // CR(krait): Why is it Console.WriteLine here and Console.Out.WriteLine there?
                         Thread.Sleep(300);
                     }
 
@@ -89,7 +92,7 @@ namespace Vostok.Logging.ConsoleLog
         private static readonly LogEvent[] currentEvents = new LogEvent[Capacity];
         private static readonly BoundedBuffer<LogEvent> eventsBuffer = new BoundedBuffer<LogEvent>(Capacity);
 
-        private const int Capacity = 10000;
+        private const int Capacity = 10000; // CR(krait): This should be configured (and be warm).
         private const string ConfigSectionName = "consoleLogConfig";
     }
 }

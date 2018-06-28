@@ -6,6 +6,7 @@ namespace Vostok.Logging.Abstractions
 {
     public static class LogEventExtensions
     {
+        // CR(krait): This should not be an extension method, let's put it right into LogEvent.
         public static LogEvent WithProperty<T>(this LogEvent @event, string key, T value)
         {
             Dictionary<string, object> properties;

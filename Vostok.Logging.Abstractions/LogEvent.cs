@@ -16,6 +16,7 @@ namespace Vostok.Logging.Abstractions
 
         public Exception Exception { get; }
 
+        // CR(krait): Let's switch to the specialized collection from commons, which should be copy-pasted here. The collection itself must be internal, of course.
         public LogEvent(LogLevel level, DateTimeOffset timestamp, string messageTemplate, IReadOnlyDictionary<string, object> properties = null, Exception exception = null)
         {
             Level = level;
