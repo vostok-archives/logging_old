@@ -14,6 +14,7 @@ namespace Vostok.Logging.FileLog
         public bool EnableRolling { get; set; } = true;
         public Encoding Encoding { get; set; } = Encoding.UTF8;
 
+        // CR(Mansiper): it's better to use prime numbers: https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode
         public override int GetHashCode()
         {
             return (FilePath?.ToLower().GetHashCode() ?? 0) * 42 + 
