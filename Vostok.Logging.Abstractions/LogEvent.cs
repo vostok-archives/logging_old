@@ -25,5 +25,31 @@ namespace Vostok.Logging.Abstractions
             Properties = properties?.ToDictionary(p => p.Key, p => p.Value, StringComparer.CurrentCultureIgnoreCase);
             Exception = exception;
         }
+
+        public LogEvent WithProperty<T>(string key, T value)
+        {
+            Dictionary<string, object> properties;
+
+            if (Properties != null)
+            {
+                if (Properties.ContainsKey(key))
+                {
+                    properties = Properties.ToDictionary(p => p.Key, p => p.Value, StringComparer.CurrentCultureIgnoreCase);
+                    properties[key] = value;
+                }
+                else
+                {
+                    properties = Properties
+                        .Concat(new[] { new KeyValuePair<string, object>(key, value) })
+                        .ToDictionary(p => p.Key, p => p.Value, StringComparer.CurrentCultureIgnoreCase);
+                }
+            }
+            else
+            {
+                properties = new Dictionary<string, object> { { key, value } };
+            }
+
+            return new LogEvent(Level, Timestamp, MessageTemplate, properties, Exception);
+        }
     }
 }

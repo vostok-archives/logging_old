@@ -7,10 +7,10 @@ namespace Vostok.Logging.ConsoleLog
     {
         public ConversionPattern ConversionPattern { get; set; } = ConversionPattern.Default;
 
-        // CR(Mansiper): multiplication is unnecessary. Why not just return ConversionPattern?.GetHashCode() ?? 0;
+        // CR(Mansiper): multiplication is unnecessary. Why not just return ConversionPattern?.GetHashCode() ?? 0; FIXED
         public override int GetHashCode()
         {
-            return (ConversionPattern?.GetHashCode() ?? 0) * 276;
+            return ConversionPattern?.GetHashCode() ?? 0;
         }
 
         public override bool Equals(object obj)

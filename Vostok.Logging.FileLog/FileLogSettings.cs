@@ -14,14 +14,14 @@ namespace Vostok.Logging.FileLog
         public bool EnableRolling { get; set; } = true;
         public Encoding Encoding { get; set; } = Encoding.UTF8;
 
-        // CR(Mansiper): it's better to use prime numbers: https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode
+        // CR(Mansiper): it's better to use prime numbers: https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode FIXED
         public override int GetHashCode()
         {
-            return (FilePath?.ToLower().GetHashCode() ?? 0) * 42 + 
-                   (ConversionPattern?.GetHashCode() ?? 0) * 276 + 
-                   (AppendToFile ? 1 : 0) * 967 + 
-                   (EnableRolling ? 1 : 0) * 352 + 
-                   Encoding.GetHashCode() * 475;
+            return (FilePath?.ToLower().GetHashCode() ?? 0) * 23 + 
+                   (ConversionPattern?.GetHashCode() ?? 0) * 17 + 
+                   (AppendToFile ? 1 : 0) * 29 + 
+                   (EnableRolling ? 1 : 0) * 13 + 
+                   Encoding.GetHashCode() * 97;
         }
 
         public override bool Equals(object obj)

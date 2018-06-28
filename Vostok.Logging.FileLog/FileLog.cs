@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
-using Vostok.Commons.ThreadManagment;
+using Vostok.Commons.Conversions;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Core;
 using Vostok.Logging.Core.Configuration;
@@ -39,7 +38,7 @@ namespace Vostok.Logging.FileLog
 
         private static void StartNewLoggingThread()
         {
-            ThreadRunner.Run(() =>
+            Task.Run(async () =>
             {
                 var startDate = DateTimeOffset.UtcNow.Date;
                 var settings = configProvider.Settings;
@@ -63,8 +62,8 @@ namespace Vostok.Logging.FileLog
                     }
                     catch (Exception exception)
                     {
-                        Console.WriteLine(exception);
-                        Thread.Sleep(300);
+                        Console.Out.WriteLine(exception);
+                        await Task.Delay(300.Milliseconds());
                     }
 
                     if (eventsBuffer.Count == 0)

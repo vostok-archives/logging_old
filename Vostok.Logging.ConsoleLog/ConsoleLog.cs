@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using Vostok.Commons.ThreadManagment;
+using Vostok.Commons.Conversions;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Core;
 using Vostok.Logging.Core.Configuration;
@@ -41,8 +40,8 @@ namespace Vostok.Logging.ConsoleLog
 
         private static void StartNewLoggingThread()
         {
-            // CR(krait): Let's not waste a thread for this. We can run it on the thread pool and use `await Task.Delay` to sleep, thus releasing the thread when unused.
-            ThreadRunner.Run(() => 
+            // CR(krait): Let's not waste a thread for this. We can run it on the thread pool and use `await Task.Delay` to sleep, thus releasing the thread when unused. FIXED
+            Task.Run(async () => 
             {
                 while (true)
                 {
@@ -53,8 +52,8 @@ namespace Vostok.Logging.ConsoleLog
                     }
                     catch (Exception exception)
                     {
-                        Console.WriteLine(exception); // CR(krait): Why is it Console.WriteLine here and Console.Out.WriteLine there?
-                        Thread.Sleep(300);
+                        Console.Out.WriteLine(exception); // CR(krait): Why is it Console.WriteLine here and Console.Out.WriteLine there? FIXED
+                        await Task.Delay(300.Milliseconds());
                     }
 
                     if (eventsBuffer.Count == 0)
