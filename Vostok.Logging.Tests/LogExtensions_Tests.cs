@@ -27,8 +27,11 @@ namespace Vostok.Logging.Tests
         {
             var method = GetLogMethod(level, typeof(ILog), typeof(string));
 
-            method.Invoke(null, new object[] {log, message});
+            method.Invoke(null, new object[] { log, message });
+            log.Received(0).Log(Arg.Any<LogEvent>());
 
+            SetLogEnabledForCurrentLevel(true);
+            method.Invoke(null, new object[] { log, message });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
                 e.MessageTemplate.Equals(message) &&
@@ -42,7 +45,10 @@ namespace Vostok.Logging.Tests
             var method = GetLogMethod(level, typeof(ILog), typeof(Exception));
 
             method.Invoke(null, new object[] { log, exception });
+            log.Received(0).Log(Arg.Any<LogEvent>());
 
+            SetLogEnabledForCurrentLevel(true);
+            method.Invoke(null, new object[] { log, exception });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
                 e.MessageTemplate == null &&
@@ -55,8 +61,11 @@ namespace Vostok.Logging.Tests
         {
             var method = GetLogMethod(level, typeof(ILog), typeof(Exception), typeof(string));
 
-            method.Invoke(null, new object[] {log, exception, message});
+            method.Invoke(null, new object[] { log, exception, message });
+            log.Received(0).Log(Arg.Any<LogEvent>());
 
+            SetLogEnabledForCurrentLevel(true);
+            method.Invoke(null, new object[] { log, exception, message });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
                 e.MessageTemplate.Equals(message) &&
@@ -70,8 +79,11 @@ namespace Vostok.Logging.Tests
             var method = GetLogMethodWithSingleGenericParameter(level, typeof(ILog), typeof(string));
             method = method.MakeGenericMethod(new {A = 1}.GetType());
 
-            method.Invoke(null, new object[] {log, message, new {A = 1}});
+            method.Invoke(null, new object[] { log, message, new { A = 1 } });
+            log.Received(0).Log(Arg.Any<LogEvent>());
 
+            SetLogEnabledForCurrentLevel(true);
+            method.Invoke(null, new object[] { log, message, new { A = 1 } });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
                 e.MessageTemplate.Equals(message) &&
@@ -87,7 +99,10 @@ namespace Vostok.Logging.Tests
 
             var obj = new CustomClass();
             method.Invoke(null, new object[] { log, message, obj });
+            log.Received(0).Log(Arg.Any<LogEvent>());
 
+            SetLogEnabledForCurrentLevel(true);
+            method.Invoke(null, new object[] { log, message, obj });
             log.Received(1).Log(Arg.Is<LogEvent>(e => e.Properties.SequenceEqual(new Dictionary<string, object> { { "0", obj } })));
         }
 
@@ -97,8 +112,11 @@ namespace Vostok.Logging.Tests
             var method = GetLogMethod(level, typeof(ILog), typeof(string), typeof(object[]));
 
             var obj = new object();
-            method.Invoke(null, new object[] { log, message, new []{ obj } });
+            method.Invoke(null, new object[] { log, message, new[] { obj } });
+            log.Received(0).Log(Arg.Any<LogEvent>());
 
+            SetLogEnabledForCurrentLevel(true);
+            method.Invoke(null, new object[] { log, message, new[] { obj } });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
                 e.MessageTemplate.Equals(message) &&
@@ -113,7 +131,10 @@ namespace Vostok.Logging.Tests
             method = method.MakeGenericMethod(new { A = 1 }.GetType());
 
             method.Invoke(null, new object[] { log, exception, message, new { A = 1 } });
+            log.Received(0).Log(Arg.Any<LogEvent>());
 
+            SetLogEnabledForCurrentLevel(true);
+            method.Invoke(null, new object[] { log, exception, message, new { A = 1 } });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
                 e.MessageTemplate.Equals(message) &&
@@ -129,7 +150,10 @@ namespace Vostok.Logging.Tests
 
             var obj = new CustomClass();
             method.Invoke(null, new object[] { log, exception, message, obj });
+            log.Received(0).Log(Arg.Any<LogEvent>());
 
+            SetLogEnabledForCurrentLevel(true);
+            method.Invoke(null, new object[] { log, exception, message, obj });
             log.Received(1).Log(Arg.Is<LogEvent>(e => e.Properties.SequenceEqual(new Dictionary<string, object> { { "0", obj } })));
         }
 
@@ -140,7 +164,10 @@ namespace Vostok.Logging.Tests
 
             var obj = new object();
             method.Invoke(null, new object[] { log, exception, message, new[] { obj } });
+            log.Received(0).Log(Arg.Any<LogEvent>());
 
+            SetLogEnabledForCurrentLevel(true);
+            method.Invoke(null, new object[] { log, exception, message, new[] { obj } });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
                 e.MessageTemplate.Equals(message) &&
@@ -153,8 +180,11 @@ namespace Vostok.Logging.Tests
         {
             var method = GetLogMethod(level, typeof(ILog), typeof(string), typeof(Exception));
 
-            method.Invoke(null, new object[] {log, message, exception});
+            method.Invoke(null, new object[] { log, message, exception });
+            log.Received(0).Log(Arg.Any<LogEvent>());
 
+            SetLogEnabledForCurrentLevel(true);
+            method.Invoke(null, new object[] { log, message, exception });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
                 e.MessageTemplate.Equals(message) &&
@@ -200,6 +230,11 @@ namespace Vostok.Logging.Tests
 
                     return parameters.Where(p => !p.IsGenericParameter).SequenceEqual(argumentsTypes);
                 });
+        }
+
+        private void SetLogEnabledForCurrentLevel(bool isEnabled)
+        {
+            log.IsEnabledFor(level).Returns(isEnabled);
         }
 
         private ILog log;
