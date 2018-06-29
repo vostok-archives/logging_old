@@ -15,8 +15,9 @@ namespace Vostok.Logging.ConsoleLog
         {
             Task.Run(() =>
                 {
-                    // CR(krait): This delay looks very suspicious. What is it for?
-                    Task.Delay(100).GetAwaiter().GetResult();
+                    // CR(krait): This delay looks very suspicious. What is it for? FIXED
+                    //TODO(mylov): Should be removed with new ConfigurationProvider.
+                    //Task.Delay(100).GetAwaiter().GetResult();
                     configProvider = configProvider ?? new LogConfigProvider<ConsoleLogSettings>(ConfigSectionName, new ConsoleLogSettingsValidator());
                     StartNewLoggingThread();
                 });

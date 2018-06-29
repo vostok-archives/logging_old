@@ -25,11 +25,11 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void SetProperty_should_rewrite_property_if_such_property_in_other_case_exists_and_collection_is_ignorecased()
+        public void SetProperty_should_not_rewrite_property_if_such_property_in_other_case_exists_and_collection_is_ignorecased()
         {
             var @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message", new Dictionary<string, object>(StringComparer.CurrentCultureIgnoreCase) { { "A", 1 } });
             @event = @event.WithProperty("a", 2);
-            @event.Properties.Should().BeEquivalentTo(new Dictionary<string, object> { { "A", 2 } });
+            @event.Properties.Should().BeEquivalentTo(new Dictionary<string, object> { { "a", 2 } });
         }
 
         [Test]

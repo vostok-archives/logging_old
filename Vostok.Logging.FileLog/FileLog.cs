@@ -14,7 +14,7 @@ namespace Vostok.Logging.FileLog
         {
             Task.Run(() =>
             {
-                Task.Delay(100).GetAwaiter().GetResult();
+                //Task.Delay(100).GetAwaiter().GetResult();
                 configProvider = configProvider ?? new LogConfigProvider<FileLogSettings>(ConfigSectionName, new FileLogSettingsValidator());
                 StartNewLoggingThread();
             });

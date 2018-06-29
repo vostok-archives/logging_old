@@ -18,6 +18,19 @@ namespace Vostok.Logging.Abstractions.Flow
 
         private readonly IEqualityComparer<TKey> keyComparer;
 
+        public static ContextPropertiesSnapshot<TKey, TValue> FromCollection(IReadOnlyDictionary<TKey, TValue> collection, IEqualityComparer<TKey> keyComparer = null)
+        {
+            if (collection == null)
+                return null;
+
+            if (collection is ContextPropertiesSnapshot<TKey, TValue> snapshot)
+                return snapshot;
+
+            snapshot = new ContextPropertiesSnapshot<TKey, TValue>(keyComparer);
+
+            return collection.Aggregate(snapshot, (current, property) => current.Set(property.Key, property.Value));
+        }
+
         public ContextPropertiesSnapshot(IEqualityComparer<TKey> keyComparer = null) : this(defaultCapacity, keyComparer) { }
 
         public ContextPropertiesSnapshot(int capacity, IEqualityComparer<TKey> keyComparer = null) : this(new ContextProperty<TKey, TValue>[capacity], 0, keyComparer) { }
@@ -78,24 +91,6 @@ namespace Vostok.Logging.Abstractions.Flow
             }
 
             return new ContextPropertiesSnapshot<TKey, TValue>(properties, Count + 1, keyComparer);
-        }
-
-        public ContextPropertiesSnapshot<TKey, TValue> Remove(TKey key)
-        {
-            if (!Find(key, out var _, out var oldIndex))
-                return this;
-
-            if (oldIndex == Count - 1)
-                return new ContextPropertiesSnapshot<TKey, TValue>(properties, Count - 1, keyComparer);
-
-            var newProperties = new ContextProperty<TKey, TValue>[properties.Length - 1];
-
-            if (oldIndex > 0)
-                Array.Copy(properties, 0, newProperties, 0, oldIndex);
-
-            Array.Copy(properties, oldIndex + 1, newProperties, oldIndex, Count - oldIndex - 1);
-
-            return new ContextPropertiesSnapshot<TKey, TValue>(newProperties, Count - 1, keyComparer);
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
