@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Text;
+using Vostok.Configuration.Abstractions;
 using Vostok.Logging.Core.Configuration;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
 namespace Vostok.Logging.FileLog
 {
+    [ValidateBy(typeof(FileLogSettingsValidator))]
     public class FileLogSettings
     {
         public string FilePath { get; set; } = "C:\\logs\\log";
@@ -13,6 +15,7 @@ namespace Vostok.Logging.FileLog
         public bool AppendToFile { get; set; } = true;
         public bool EnableRolling { get; set; } = true;
         public Encoding Encoding { get; set; } = Encoding.UTF8;
+        public int EventsQueueCapacity { get; set; } = 10000;
 
         // CR(Mansiper): it's better to use prime numbers: https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode FIXED
         public override int GetHashCode()
@@ -21,7 +24,8 @@ namespace Vostok.Logging.FileLog
                    (ConversionPattern?.GetHashCode() ?? 0) * 17 + 
                    (AppendToFile ? 1 : 0) * 29 + 
                    (EnableRolling ? 1 : 0) * 13 + 
-                   Encoding.GetHashCode() * 97;
+                   Encoding.GetHashCode() * 97 + 
+                   EventsQueueCapacity * 3;
         }
 
         public override bool Equals(object obj)
@@ -34,10 +38,10 @@ namespace Vostok.Logging.FileLog
             if (other == null)
                 return false;
 
-            var filePathesAreEqual = FilePath == null && other.FilePath == null || 
+            var filePathesAreEqual = FilePath == null && other.FilePath == null ||
                                      FilePath != null && FilePath.Equals(other.FilePath, StringComparison.CurrentCultureIgnoreCase);
 
-            var conversionPatternsAreEqual = ConversionPattern == null && other.ConversionPattern == null || 
+            var conversionPatternsAreEqual = ConversionPattern == null && other.ConversionPattern == null ||
                                              ConversionPattern != null && ConversionPattern.Equals(other.ConversionPattern);
 
             var encodingsAreEqual = Encoding == null && other.Encoding == null ||
@@ -45,10 +49,11 @@ namespace Vostok.Logging.FileLog
 
 
             return filePathesAreEqual &&
-                   conversionPatternsAreEqual && 
-                   AppendToFile == other.AppendToFile && 
-                   EnableRolling == other.EnableRolling && 
-                   encodingsAreEqual;
+                   conversionPatternsAreEqual &&
+                   AppendToFile == other.AppendToFile &&
+                   EnableRolling == other.EnableRolling &&
+                   encodingsAreEqual &&
+                   EventsQueueCapacity == other.EventsQueueCapacity;
         }
     }
 }

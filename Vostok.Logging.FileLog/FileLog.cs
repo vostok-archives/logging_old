@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Vostok.Commons.Conversions;
 using Vostok.Logging.Abstractions;
@@ -12,24 +13,21 @@ namespace Vostok.Logging.FileLog
     {
         static FileLog()
         {
-            Task.Run(() =>
-            {
-                //Task.Delay(100).GetAwaiter().GetResult();
-                configProvider = configProvider ?? new LogConfigProvider<FileLogSettings>(ConfigSectionName, new FileLogSettingsValidator());
-                StartNewLoggingThread();
-            });
+            configProvider = new LogConfigProvider<FileLogSettings>(configSectionName);
         }
 
-        public static void Configure(Func<FileLogSettings> settingsSource)
+        public static void Configure(FileLogSettings settings)
         {
-            configProvider?.Dispose();
-            configProvider = new LogConfigProvider<FileLogSettings>(settingsSource, new FileLogSettingsValidator());
+            configProvider = new LogConfigProvider<FileLogSettings>(settings);
         }
 
         public void Log(LogEvent @event)
         {
             if (@event == null)
                 return;
+
+            if(!IsInitialized)
+                Initialize();
 
             eventsBuffer.TryAdd(@event);
         }
@@ -47,6 +45,7 @@ namespace Vostok.Logging.FileLog
                 while (true)
                 {
                     var settingsWereUpdated = TryUpdateSettings(ref settings);
+
                     try
                     {
                         var currentDate = DateTimeOffset.UtcNow.Date;
@@ -101,21 +100,47 @@ namespace Vostok.Logging.FileLog
 
         private static void WriteEventsToFile(TextWriter writer, FileLogSettings settings)
         {
-            var eventsCount = eventsBuffer.Drain(currentEvents, 0, currentEvents.Length);
+            var buffer = eventsBuffer;
+            var eventsToWrite = currentEventsBuffer;
+
+            if (settings.EventsQueueCapacity != capacity)
+                ReinitEventsQueue(settings);
+
+            var eventsCount = buffer.Drain(eventsToWrite, 0, eventsToWrite.Length);
             for (var i = 0; i < eventsCount; i++)
             {
-                var currentEvent = currentEvents[i];
+                var currentEvent = eventsToWrite[i];
                 writer.Write(settings.ConversionPattern.Format(currentEvent));
             }
             writer.Flush();
         }
 
+        private static void Initialize()
+        {
+            if (Interlocked.CompareExchange(ref isInitializedFlag, 1, 0) != isInitializedFlag)
+            {
+                ReinitEventsQueue(configProvider.Settings);
+                StartNewLoggingThread();
+            }
+        }
+
+        private static void ReinitEventsQueue(FileLogSettings settings)
+        {
+            capacity = settings.EventsQueueCapacity;
+            currentEventsBuffer = new LogEvent[capacity];
+            eventsBuffer = new BoundedBuffer<LogEvent>(capacity);
+        }
+
+        private static bool IsInitialized => isInitializedFlag == 1;
+
+        private static int isInitializedFlag;
+
         private static ILogConfigProvider<FileLogSettings> configProvider;
 
-        private static readonly LogEvent[] currentEvents = new LogEvent[Capacity];
-        private static readonly BoundedBuffer<LogEvent> eventsBuffer = new BoundedBuffer<LogEvent>(Capacity);
+        private static int capacity;
+        private static LogEvent[] currentEventsBuffer;
+        private static BoundedBuffer<LogEvent> eventsBuffer;
 
-        private const int Capacity = 10000;
-        private const string ConfigSectionName = "fileLogConfig";
+        private const string configSectionName = "fileLogConfig";
     }
 }

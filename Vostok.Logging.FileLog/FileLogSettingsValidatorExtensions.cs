@@ -6,7 +6,7 @@ namespace Vostok.Logging.FileLog
     {
         public static SettingsValidationResult Validate(this FileLogSettings settings)
         {
-            return validator.Validate(settings);
+            return validator.TryValidate(settings);
         }
 
         private static readonly FileLogSettingsValidator validator = new FileLogSettingsValidator();

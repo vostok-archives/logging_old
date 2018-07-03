@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Vostok.Configuration.Abstractions.Validation;
 
 namespace Vostok.Logging.Core
 {
@@ -21,6 +22,11 @@ namespace Vostok.Logging.Core
         public static SettingsValidationResult ConversionPatternIsNull()
         {
             return new SettingsValidationResult(ValidationResultType.ConversionPatternIsNull);
+        }
+
+        public static SettingsValidationResult CapacityIsLessThanZero()
+        {
+            return new SettingsValidationResult(ValidationResultType.CapacityIsLessThanZero);
         }
 
         public static SettingsValidationResult FilePathIsNullOrEmpty()
@@ -82,6 +88,7 @@ namespace Vostok.Logging.Core
             NotSupportedSettingsType,
             EncodingIsNull,
             ConversionPatternIsNull,
+            CapacityIsLessThanZero,
             FilePathIsNullOrEmpty,
             FilePathIsNotCorrect,
             DirectoryNotFound,

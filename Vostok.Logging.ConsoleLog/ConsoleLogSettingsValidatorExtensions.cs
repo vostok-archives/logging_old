@@ -6,7 +6,7 @@ namespace Vostok.Logging.ConsoleLog
     {
         public static SettingsValidationResult Validate(this ConsoleLogSettings settings)
         {
-            return validator.Validate(settings);
+            return validator.TryValidate(settings);
         }
 
         private static readonly ConsoleLogSettingsValidator validator = new ConsoleLogSettingsValidator();

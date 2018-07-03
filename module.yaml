@@ -13,9 +13,13 @@ default:
     - vostok.commons@dev
 
 notests *default:
+  deps:
+    - vostok.configuration@dev
   build:
     configuration: NoTests
 
 full-build:
+  deps:
+    - vostok.configuration@dev
   build:
     configuration: Release

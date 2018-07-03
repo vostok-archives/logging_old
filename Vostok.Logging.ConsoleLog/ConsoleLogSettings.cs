@@ -1,16 +1,19 @@
 ﻿// ReSharper disable NonReadonlyMemberInGetHashCode
+using Vostok.Configuration.Abstractions;
 using Vostok.Logging.Core.Configuration;
 
 namespace Vostok.Logging.ConsoleLog
 {
+    [ValidateBy(typeof(ConsoleLogSettingsValidator))]
     public class ConsoleLogSettings
     {
         public ConversionPattern ConversionPattern { get; set; } = ConversionPattern.Default;
+        public int EventsQueueCapacity { get; set; } = 10000;
 
         // CR(Mansiper): multiplication is unnecessary. Why not just return ConversionPattern?.GetHashCode() ?? 0; FIXED
         public override int GetHashCode()
         {
-            return ConversionPattern?.GetHashCode() ?? 0;
+            return (ConversionPattern?.GetHashCode() ?? 0) + EventsQueueCapacity * 3;
         }
 
         public override bool Equals(object obj)
@@ -23,8 +26,10 @@ namespace Vostok.Logging.ConsoleLog
             if (other == null)
                 return false;
 
-            return ConversionPattern == null && other.ConversionPattern == null ||
-                   ConversionPattern != null && ConversionPattern.Equals(other.ConversionPattern);
+            var conversionPatternsAreEqual = ConversionPattern == null && other.ConversionPattern == null ||
+                                             ConversionPattern != null && ConversionPattern.Equals(other.ConversionPattern);
+
+            return conversionPatternsAreEqual && EventsQueueCapacity == other.EventsQueueCapacity;
         }
     }
 }

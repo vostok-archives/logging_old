@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
+using Vostok.Configuration.Abstractions.Validation;
 using Vostok.Logging.Core;
 
 namespace Vostok.Logging.FileLog
 {
     internal class FileLogSettingsValidator : ILogSettingsValidator<FileLogSettings>
     {
-        public SettingsValidationResult Validate(FileLogSettings settings)
+        public SettingsValidationResult TryValidate(FileLogSettings settings)
         {
             if (settings?.Encoding == null)
                 return SettingsValidationResult.EncodingIsNull();
@@ -14,7 +15,19 @@ namespace Vostok.Logging.FileLog
             if (settings.ConversionPattern == null)
                 return SettingsValidationResult.ConversionPatternIsNull();
 
+            if (settings.EventsQueueCapacity <= 0)
+                return SettingsValidationResult.CapacityIsLessThanZero();
+
             return FilePathIsValid(settings.FilePath);
+        }
+
+        public void Validate(FileLogSettings value, ISettingsValidationErrors errors)
+        {
+            var validationResult = TryValidate(value);
+            if (!validationResult.IsSuccessful)
+            {
+                errors.ReportError(validationResult.ToString());
+            }
         }
 
         private static SettingsValidationResult FilePathIsValid(string filePath)

@@ -1,79 +1,58 @@
 ﻿using System;
-using System.Threading;
-using Vostok.Commons.Conversions;
-using Vostok.Commons.ThreadManagment;
-using Vostok.Logging.Core.Configuration.Sections;
-using Vostok.Logging.Core.Configuration.SettingsSources;
+using Vostok.Configuration;
+using Vostok.Configuration.Abstractions;
+using Vostok.Configuration.Binders;
+using Vostok.Configuration.Sources;
 
 namespace Vostok.Logging.Core.Configuration
 {
     internal class LogConfigProvider<TSettings> : ILogConfigProvider<TSettings> where TSettings : new()
     {
-        public TSettings Settings { get; private set; } = new TSettings();
+        public TSettings Settings => TryGetSettings();
 
-        public LogConfigProvider(string sectionName, ILogSettingsValidator<TSettings> settingsValidator)
-            : this(new ConfigSectionSettingsSource<TSettings>(() => new XmlConfigSection(sectionName, $"{AppDomain.CurrentDomain.FriendlyName}.config")),
-                settingsValidator) { }
-
-        public LogConfigProvider(Func<TSettings> source, ILogSettingsValidator<TSettings> settingsValidator)
-            : this(new StaticSettingsSource<TSettings>(source),
-                settingsValidator)
-        {
-            TryUpdateCache();
-        }
-
-        private LogConfigProvider(ISettingsSource<TSettings> settingsSource, ILogSettingsValidator<TSettings> settingsValidator)
-        {
-            this.settingsSource = settingsSource;
-            this.settingsValidator = settingsValidator;
-
-            ThreadRunner.Run(() =>
-            {
-                while (!isDisposed)
-                {
-                    TryUpdateCache();
-                    Thread.Sleep(updateCachePeriod);
-                }
-            });
-        }
-
-        public void Dispose()
-        {
-            isDisposed = true;
-        }
-
-        private void TryUpdateCache()
+        private TSettings TryGetSettings()
         {
             try
-            { 
-                var settings = settingsSource.GetSettings();
-                if (settings == null)
-                {
-                    if (Settings == null)
-                        Settings = new TSettings();
-
-                    return;
-                }
-
-                var validationResult = settingsValidator.Validate(settings);
-                validationResult.EnsureSuccess();
-
-                Settings = settings;
+            {
+                return configProvider.Get<TSettings>();
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception);
-
-                if (Settings == null)
-                    Settings = new TSettings();
+                OnError(exception);
+                return defaultSettings;
             }
         }
 
-        private bool isDisposed;
+        public LogConfigProvider(string fileName, string sectionName) : this(new ScopedSource(new XmlFileSource(fileName), configurationTagName, sectionName)) { }
 
-        private readonly ISettingsSource<TSettings> settingsSource;
-        private readonly ILogSettingsValidator<TSettings> settingsValidator;
+        public LogConfigProvider(string sectionName) : this(AppConfigFileName, sectionName) { }
 
-        private readonly TimeSpan updateCachePeriod = 5.Seconds();
+        public LogConfigProvider(TSettings settings)
+        {
+            configProvider = GetConfiguredConfigProvider().SetManually(settings, true);
+        }
+
+        private LogConfigProvider(IConfigurationSource settingsSource)
+        {
+            configProvider = GetConfiguredConfigProvider().SetupSourceFor<TSettings>(settingsSource);
+        }
+
+        private static ConfigurationProvider GetConfiguredConfigProvider()
+        {
+            var binder = new DefaultSettingsBinder().WithDefaultParsers().WithCustomParser<ConversionPattern>(ConversionPattern.TryParse);
+            var configProviderSettings = new ConfigurationProviderSettings { Binder = binder, OnError = OnError };
+            return new ConfigurationProvider(configProviderSettings);
+        }
+
+        private static string AppConfigFileName => $"{AppDomain.CurrentDomain.FriendlyName}.config";
+
+        private static void OnError(Exception exception)
+        {
+            Console.Out.WriteLine(exception);
+        }
+
+        private readonly IConfigurationProvider configProvider;
+        private readonly TSettings defaultSettings = new TSettings();
+        private const string configurationTagName = "configuration";
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Vostok.Commons.Conversions;
 using Vostok.Logging.Abstractions;
@@ -8,31 +9,27 @@ using Vostok.Logging.Core.Configuration;
 
 namespace Vostok.Logging.ConsoleLog
 {
-    // CR(krait): Most of the comments also apply to FileLog.
+    // CR(krait): Most of the comments also apply to FileLog. FIXED
     public class ConsoleLog : ILog
     {
         static ConsoleLog()
         {
-            Task.Run(() =>
-                {
-                    // CR(krait): This delay looks very suspicious. What is it for? FIXED
-                    //TODO(mylov): Should be removed with new ConfigurationProvider.
-                    //Task.Delay(100).GetAwaiter().GetResult();
-                    configProvider = configProvider ?? new LogConfigProvider<ConsoleLogSettings>(ConfigSectionName, new ConsoleLogSettingsValidator());
-                    StartNewLoggingThread();
-                });
+            // CR(krait): This delay looks very suspicious. What is it for? FIXED
+            configProvider = new LogConfigProvider<ConsoleLogSettings>(configSectionName);
         }
 
-        public static void Configure(Func<ConsoleLogSettings> settingsSource)
+        public static void Configure(ConsoleLogSettings settings)
         {
-            configProvider?.Dispose();
-            configProvider = new LogConfigProvider<ConsoleLogSettings>(settingsSource, new ConsoleLogSettingsValidator());
+            configProvider = new LogConfigProvider<ConsoleLogSettings>(settings);
         }
 
         public void Log(LogEvent @event)
         {
             if (@event == null)
                 return;
+
+            if (!IsInitialized)
+                Initialize();
 
             eventsBuffer.TryAdd(@event);
         }
@@ -47,6 +44,7 @@ namespace Vostok.Logging.ConsoleLog
                 while (true)
                 {
                     var settings = configProvider.Settings;
+
                     try
                     {
                         WriteEventsToConsole(settings);
@@ -67,15 +65,37 @@ namespace Vostok.Logging.ConsoleLog
 
         private static void WriteEventsToConsole(ConsoleLogSettings settings)
         {
-            var eventsCount = eventsBuffer.Drain(currentEvents, 0, currentEvents.Length);
+            var buffer = eventsBuffer;
+            var eventsToWrite = currentEventsBuffer;
+
+            if (settings.EventsQueueCapacity != capacity)
+                ReinitEventsQueue(settings);
+
+            var eventsCount = buffer.Drain(eventsToWrite, 0, eventsToWrite.Length);
             for (var i = 0; i < eventsCount; i++)
             {
-                var currentEvent = currentEvents[i];
+                var currentEvent = eventsToWrite[i];
                 using (new ConsoleColorChanger(levelToColor[currentEvent.Level]))
                 {
                     Console.Out.Write(settings.ConversionPattern.Format(currentEvent));
                 }
             }
+        }
+
+        private static void Initialize()
+        {
+            if (Interlocked.CompareExchange(ref isInitializedFlag, 1, 0) != isInitializedFlag)
+            {
+                ReinitEventsQueue(configProvider.Settings);
+                StartNewLoggingThread();
+            }
+        }
+
+        private static void ReinitEventsQueue(ConsoleLogSettings settings)
+        {
+            capacity = settings.EventsQueueCapacity;
+            currentEventsBuffer = new LogEvent[capacity];
+            eventsBuffer = new BoundedBuffer<LogEvent>(capacity);
         }
 
         private static readonly Dictionary<LogLevel, ConsoleColor> levelToColor = new Dictionary<LogLevel, ConsoleColor>
@@ -87,12 +107,16 @@ namespace Vostok.Logging.ConsoleLog
             {LogLevel.Fatal, ConsoleColor.Red}
         };
 
+        private static bool IsInitialized => isInitializedFlag == 1;
+
+        private static int isInitializedFlag;
+
         private static ILogConfigProvider<ConsoleLogSettings> configProvider;
 
-        private static readonly LogEvent[] currentEvents = new LogEvent[Capacity];
-        private static readonly BoundedBuffer<LogEvent> eventsBuffer = new BoundedBuffer<LogEvent>(Capacity);
+        private static int capacity; // CR(krait): This should be configured (and be warm). FIXED
+        private static LogEvent[] currentEventsBuffer;
+        private static BoundedBuffer<LogEvent> eventsBuffer;
 
-        private const int Capacity = 10000; // CR(krait): This should be configured (and be warm).
-        private const string ConfigSectionName = "consoleLogConfig";
+        private const string configSectionName = "consoleLogConfig";
     }
 }
