@@ -13,6 +13,7 @@ using Vostok.Logging.FileLog;
 
 namespace Vostok.Logging.Tests
 {
+    // CR(krait): Fix tests.
     [TestFixture]
     internal class FileLog_Tests
     {

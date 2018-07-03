@@ -6,6 +6,8 @@ using Vostok.Logging.Abstractions;
 
 namespace Vostok.Logging.Tests
 {
+    // CR(krait): 1. It's called 'WithProperty' now.
+    // CR(krait): 2. It's been moved to LogEvent.
     internal class LogEventExtensions_Tests
     {
         [Test]
@@ -24,6 +26,7 @@ namespace Vostok.Logging.Tests
             @event.Properties.Should().BeEquivalentTo(new Dictionary<string, object> { { "A", 2 } });
         }
 
+        // CR(krait): It's always 'ignorecased' now.
         [Test]
         public void SetProperty_should_not_rewrite_property_if_such_property_in_other_case_exists_and_collection_is_ignorecased()
         {

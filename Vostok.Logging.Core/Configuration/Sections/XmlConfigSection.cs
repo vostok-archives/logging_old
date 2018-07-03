@@ -6,6 +6,7 @@ using System.Xml;
 
 namespace Vostok.Logging.Core.Configuration.Sections
 {
+    // CR(krait): Please delete all unused code.
     internal class XmlConfigSection : IConfigSection
     {
         public IReadOnlyDictionary<string, string> Settings { get; }

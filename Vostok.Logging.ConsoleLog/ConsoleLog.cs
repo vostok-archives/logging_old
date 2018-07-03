@@ -9,12 +9,10 @@ using Vostok.Logging.Core.Configuration;
 
 namespace Vostok.Logging.ConsoleLog
 {
-    // CR(krait): Most of the comments also apply to FileLog. FIXED
     public class ConsoleLog : ILog
     {
         static ConsoleLog()
         {
-            // CR(krait): This delay looks very suspicious. What is it for? FIXED
             configProvider = new LogConfigProvider<ConsoleLogSettings>(configSectionName);
         }
 
@@ -38,7 +36,6 @@ namespace Vostok.Logging.ConsoleLog
 
         private static void StartNewLoggingThread()
         {
-            // CR(krait): Let's not waste a thread for this. We can run it on the thread pool and use `await Task.Delay` to sleep, thus releasing the thread when unused. FIXED
             Task.Run(async () => 
             {
                 while (true)
@@ -51,12 +48,13 @@ namespace Vostok.Logging.ConsoleLog
                     }
                     catch (Exception exception)
                     {
-                        Console.Out.WriteLine(exception); // CR(krait): Why is it Console.WriteLine here and Console.Out.WriteLine there? FIXED
+                        Console.Out.WriteLine(exception);
                         await Task.Delay(300.Milliseconds());
                     }
 
                     if (eventsBuffer.Count == 0)
                     {
+                        // CR(krait): Nope, we must wait asynchronously here. Now we still waste a thread while waiting.
                         eventsBuffer.WaitForNewItems();
                     }
                 }
@@ -107,15 +105,16 @@ namespace Vostok.Logging.ConsoleLog
             {LogLevel.Fatal, ConsoleColor.Red}
         };
 
+        // CR(krait): Switch to AtomicBoolean.
         private static bool IsInitialized => isInitializedFlag == 1;
 
         private static int isInitializedFlag;
 
         private static ILogConfigProvider<ConsoleLogSettings> configProvider;
 
-        private static int capacity; // CR(krait): This should be configured (and be warm). FIXED
-        private static LogEvent[] currentEventsBuffer;
-        private static BoundedBuffer<LogEvent> eventsBuffer;
+        private static int capacity; // CR(krait): This field can be replaced with currentEventsBuffer.Length
+        private static volatile LogEvent[] currentEventsBuffer;
+        private static volatile BoundedBuffer<LogEvent> eventsBuffer;
 
         private const string configSectionName = "consoleLogConfig";
     }

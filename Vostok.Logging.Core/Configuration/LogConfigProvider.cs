@@ -23,6 +23,7 @@ namespace Vostok.Logging.Core.Configuration
             }
         }
 
+        // CR(krait): Use new XmlFileSource(fileName).ScopeTo(...)
         public LogConfigProvider(string fileName, string sectionName) : this(new ScopedSource(new XmlFileSource(fileName), configurationTagName, sectionName)) { }
 
         public LogConfigProvider(string sectionName) : this(AppConfigFileName, sectionName) { }

@@ -10,14 +10,14 @@ namespace Vostok.Logging.FileLog
     [ValidateBy(typeof(FileLogSettingsValidator))]
     public class FileLogSettings
     {
-        public string FilePath { get; set; } = "C:\\logs\\log";
+        public string FilePath { get; set; } = "C:\\logs\\log"; // CR(krait): A bad default.
         public ConversionPattern ConversionPattern { get; set; } = ConversionPattern.Default;
         public bool AppendToFile { get; set; } = true;
         public bool EnableRolling { get; set; } = true;
         public Encoding Encoding { get; set; } = Encoding.UTF8;
         public int EventsQueueCapacity { get; set; } = 10000;
 
-        // CR(Mansiper): it's better to use prime numbers: https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode FIXED
+        // CR(krait): Do you actually need to compare FileLogSettings?
         public override int GetHashCode()
         {
             return (FilePath?.ToLower().GetHashCode() ?? 0) * 23 + 

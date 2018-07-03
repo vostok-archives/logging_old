@@ -10,7 +10,7 @@ namespace Vostok.Logging.ConsoleLog
         public ConversionPattern ConversionPattern { get; set; } = ConversionPattern.Default;
         public int EventsQueueCapacity { get; set; } = 10000;
 
-        // CR(Mansiper): multiplication is unnecessary. Why not just return ConversionPattern?.GetHashCode() ?? 0; FIXED
+        // CR(krait): Do you actually need to compare ConsoleLogSettings?
         public override int GetHashCode()
         {
             return (ConversionPattern?.GetHashCode() ?? 0) + EventsQueueCapacity * 3;
