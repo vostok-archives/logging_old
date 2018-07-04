@@ -9,7 +9,7 @@ namespace Vostok.Logging.FileLog
     [ValidateBy(typeof(FileLogSettingsValidator))]
     public class FileLogSettings
     {
-        public string FilePath { get; set; } = "C:\\logs\\log"; // CR(krait): A bad default.
+        public string FilePath { get; set; } = "logs\\log";
         public ConversionPattern ConversionPattern { get; set; } = ConversionPattern.Default;
         public bool AppendToFile { get; set; } = true;
         public bool EnableRolling { get; set; } = true;

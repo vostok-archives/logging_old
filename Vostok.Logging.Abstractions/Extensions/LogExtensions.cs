@@ -7,7 +7,7 @@ namespace Vostok.Logging.Abstractions
     {
         #region Debug
 
-        public static void Debug(this ILog log, string message)
+        public static void Debug(this ILog log, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.Debug))
                 return;
@@ -15,7 +15,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.Debug, DateTimeOffset.UtcNow, message));
         }
 
-        public static void Debug(this ILog log, Exception exception)
+        public static void Debug(this ILog log, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.Debug))
                 return;
@@ -23,7 +23,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.Debug, DateTimeOffset.UtcNow, null, exception: exception));
         }
 
-        public static void Debug(this ILog log, Exception exception, string message)
+        public static void Debug(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.Debug))
                 return;
@@ -32,7 +32,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Debug<T>(this ILog log, string messageTemplate, T properties)
+        public static void Debug<T>(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.Debug))
                 return;
@@ -47,7 +47,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Debug(this ILog log, string messageTemplate, params object[] parameters)
+        public static void Debug(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.Debug))
                 return;
@@ -56,7 +56,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Debug<T>(this ILog log, Exception exception, string messageTemplate, T properties)
+        public static void Debug<T>(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.Debug))
                 return;
@@ -71,7 +71,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Debug(this ILog log, Exception exception, string messageTemplate, params object[] parameters)
+        public static void Debug(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.Debug))
                 return;
@@ -80,7 +80,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [Obsolete]
-        public static void Debug(this ILog log, string message, Exception exception)
+        public static void Debug(this ILog log, [CanBeNull] string message, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.Debug))
                 return;
@@ -92,7 +92,7 @@ namespace Vostok.Logging.Abstractions
 
         #region Info
 
-        public static void Info(this ILog log, string message)
+        public static void Info(this ILog log, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.Info))
                 return;
@@ -100,7 +100,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, message));
         }
 
-        public static void Info(this ILog log, Exception exception)
+        public static void Info(this ILog log, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.Info))
                 return;
@@ -108,7 +108,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, null, exception: exception));
         }
 
-        public static void Info(this ILog log, Exception exception, string message)
+        public static void Info(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.Info))
                 return;
@@ -117,7 +117,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Info<T>(this ILog log, string messageTemplate, T properties)
+        public static void Info<T>(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.Info))
                 return;
@@ -132,7 +132,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Info(this ILog log, string messageTemplate, params object[] parameters)
+        public static void Info(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.Info))
                 return;
@@ -141,7 +141,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Info<T>(this ILog log, Exception exception, string messageTemplate, T properties)
+        public static void Info<T>(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.Info))
                 return;
@@ -156,7 +156,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Info(this ILog log, Exception exception, string messageTemplate, params object[] parameters)
+        public static void Info(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.Info))
                 return;
@@ -165,7 +165,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [Obsolete]
-        public static void Info(this ILog log, string message, Exception exception)
+        public static void Info(this ILog log, [CanBeNull] string message, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.Info))
                 return;
@@ -177,7 +177,7 @@ namespace Vostok.Logging.Abstractions
 
         #region Warn
 
-        public static void Warn(this ILog log, string message)
+        public static void Warn(this ILog log, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.Warn))
                 return;
@@ -185,7 +185,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.Warn, DateTimeOffset.UtcNow, message));
         }
 
-        public static void Warn(this ILog log, Exception exception)
+        public static void Warn(this ILog log, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.Warn))
                 return;
@@ -193,7 +193,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.Warn, DateTimeOffset.UtcNow, null, exception: exception));
         }
 
-        public static void Warn(this ILog log, Exception exception, string message)
+        public static void Warn(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.Warn))
                 return;
@@ -202,7 +202,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Warn<T>(this ILog log, string messageTemplate, T properties)
+        public static void Warn<T>(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.Warn))
                 return;
@@ -217,7 +217,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Warn(this ILog log, string messageTemplate, params object[] parameters)
+        public static void Warn(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.Warn))
                 return;
@@ -226,7 +226,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Warn<T>(this ILog log, Exception exception, string messageTemplate, T properties)
+        public static void Warn<T>(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.Warn))
                 return;
@@ -241,7 +241,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Warn(this ILog log, Exception exception, string messageTemplate, params object[] parameters)
+        public static void Warn(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.Warn))
                 return;
@@ -250,7 +250,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [Obsolete]
-        public static void Warn(this ILog log, string message, Exception exception)
+        public static void Warn(this ILog log, [CanBeNull] string message, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.Warn))
                 return;
@@ -262,7 +262,7 @@ namespace Vostok.Logging.Abstractions
 
         #region Error
 
-        public static void Error(this ILog log, string message)
+        public static void Error(this ILog log, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.Error))
                 return;
@@ -270,7 +270,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.Error, DateTimeOffset.UtcNow, message));
         }
 
-        public static void Error(this ILog log, Exception exception)
+        public static void Error(this ILog log, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.Error))
                 return;
@@ -278,7 +278,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.Error, DateTimeOffset.UtcNow, null, exception: exception));
         }
 
-        public static void Error(this ILog log, Exception exception, string message)
+        public static void Error(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.Error))
                 return;
@@ -287,7 +287,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Error<T>(this ILog log, string messageTemplate, T properties)
+        public static void Error<T>(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.Error))
                 return;
@@ -302,7 +302,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Error(this ILog log, string messageTemplate, params object[] parameters)
+        public static void Error(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.Error))
                 return;
@@ -311,7 +311,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Error<T>(this ILog log, Exception exception, string messageTemplate, T properties)
+        public static void Error<T>(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.Error))
                 return;
@@ -326,7 +326,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Error(this ILog log, Exception exception, string messageTemplate, params object[] parameters)
+        public static void Error(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.Error))
                 return;
@@ -335,7 +335,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [Obsolete]
-        public static void Error(this ILog log, string message, Exception exception)
+        public static void Error(this ILog log, [CanBeNull] string message, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.Error))
                 return;
@@ -347,7 +347,7 @@ namespace Vostok.Logging.Abstractions
 
         #region Fatal
 
-        public static void Fatal(this ILog log, string message)
+        public static void Fatal(this ILog log, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.Fatal))
                 return;
@@ -355,7 +355,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.Fatal, DateTimeOffset.UtcNow, message));
         }
 
-        public static void Fatal(this ILog log, Exception exception)
+        public static void Fatal(this ILog log, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.Fatal))
                 return;
@@ -363,7 +363,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.Fatal, DateTimeOffset.UtcNow, null, exception: exception));
         }
 
-        public static void Fatal(this ILog log, Exception exception, string message)
+        public static void Fatal(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.Fatal))
                 return;
@@ -372,7 +372,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Fatal<T>(this ILog log, string messageTemplate, T properties)
+        public static void Fatal<T>(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.Fatal))
                 return;
@@ -387,7 +387,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Fatal(this ILog log, string messageTemplate, params object[] parameters)
+        public static void Fatal(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.Fatal))
                 return;
@@ -396,7 +396,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Fatal<T>(this ILog log, Exception exception, string messageTemplate, T properties)
+        public static void Fatal<T>(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.Fatal))
                 return;
@@ -411,7 +411,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void Fatal(this ILog log, Exception exception, string messageTemplate, params object[] parameters)
+        public static void Fatal(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.Fatal))
                 return;
@@ -420,7 +420,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [Obsolete]
-        public static void Fatal(this ILog log, string message, Exception exception)
+        public static void Fatal(this ILog log, [CanBeNull] string message, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.Fatal))
                 return;

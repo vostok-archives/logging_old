@@ -2,6 +2,7 @@
 using System.IO;
 using Vostok.Configuration.Abstractions.Validation;
 using Vostok.Logging.Core;
+// ReSharper disable ReturnValueOfPureMethodIsNotUsed
 
 namespace Vostok.Logging.FileLog
 {
@@ -35,19 +36,14 @@ namespace Vostok.Logging.FileLog
             if (string.IsNullOrWhiteSpace(filePath))
                 return SettingsValidationResult.FilePathIsNullOrEmpty();
 
-            string fullPath;
             try
             {
-                fullPath = Path.GetFullPath(filePath);
+                Path.GetFullPath(filePath);
             }
             catch (NotSupportedException exception)
             {
                 return SettingsValidationResult.FilePathIsNotCorrect(filePath, exception);
             }
-
-            var directoryName = Path.GetDirectoryName(fullPath);
-            if (!Directory.Exists(directoryName))
-                return SettingsValidationResult.DirectoryNotFound(directoryName);
 
             return SettingsValidationResult.Success();
         }

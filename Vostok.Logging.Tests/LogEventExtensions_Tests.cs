@@ -24,13 +24,16 @@ namespace Vostok.Logging.Tests
             @event.Properties.Should().BeEquivalentTo(new Dictionary<string, object> { { "A", 2 } });
         }
 
-        // CR(krait): It's always 'ignorecased' now.
         [Test]
-        public void WithProperty_should_not_rewrite_property_if_such_property_in_other_case_exists_and_collection_is_ignorecased()
+        public void WithProperty_should_rewrite_property_if_such_property_in_other_case_exists_regardless_collection_is_ignorecased_or_not()
         {
-            var @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message", new Dictionary<string, object>(StringComparer.CurrentCultureIgnoreCase) { { "A", 1 } });
-            @event = @event.WithProperty("a", 2);
-            @event.Properties.Should().BeEquivalentTo(new Dictionary<string, object> { { "a", 2 } });
+            var @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message", new Dictionary<string, object>(StringComparer.CurrentCultureIgnoreCase) { { "a", 1 } });
+            @event = @event.WithProperty("A", 2);
+            @event.Properties.Should().BeEquivalentTo(new Dictionary<string, object> { { "A", 2 } });
+
+            @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message", new Dictionary<string, object> { { "a", 1 } });
+            @event = @event.WithProperty("A", 2);
+            @event.Properties.Should().BeEquivalentTo(new Dictionary<string, object> { { "A", 2 } });
         }
 
         [Test]

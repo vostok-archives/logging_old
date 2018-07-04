@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace Vostok.Logging.Abstractions
 {
     public static class LogEventFormatter
     {
-        public static string FormatMessage(string template, IReadOnlyDictionary<string, object> properties)
+        public static string FormatMessage([CanBeNull] string template, [CanBeNull] IReadOnlyDictionary<string, object> properties)
         {
             if (template == null)
                 return null;

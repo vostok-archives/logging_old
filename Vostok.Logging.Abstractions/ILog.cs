@@ -1,8 +1,10 @@
-﻿namespace Vostok.Logging.Abstractions
+﻿using JetBrains.Annotations;
+
+namespace Vostok.Logging.Abstractions
 {
     public interface ILog
     {
-        void Log(LogEvent @event);
+        void Log([CanBeNull] LogEvent @event);
 
         bool IsEnabledFor(LogLevel level);
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using Vostok.Logging.Abstractions;
 
 namespace Vostok.Logging.Core.Configuration
@@ -11,12 +12,12 @@ namespace Vostok.Logging.Core.Configuration
     {
         public string PatternStr { get; }
 
-        public static ConversionPattern FromString(string patternStr)
+        public static ConversionPattern FromString([CanBeNull] string patternStr)
         {
             return new ConversionPattern(patternStr, true);
         }
 
-        public static bool TryParse(string patternStr, out ConversionPattern result)
+        public static bool TryParse([CanBeNull] string patternStr, out ConversionPattern result)
         {
             result = null;
             if (patternStr == null)
@@ -28,7 +29,7 @@ namespace Vostok.Logging.Core.Configuration
 
         public static ConversionPattern Default => new ConversionPattern(string.Join(" ", patternKeys.Keys.Select(k => $"{{{k}}}")), false);
 
-        public string Format(LogEvent @event)
+        public string Format([NotNull] LogEvent @event)
         {
             var timestamp = @event.Timestamp.ToString("HH:mm:ss zzz");
             var level = @event.Level;
@@ -46,13 +47,13 @@ namespace Vostok.Logging.Core.Configuration
             if (@event.Properties == null)
                 return formattedLine;
 
-            return Regex.Replace(formattedLine, SinglePropertyPattern, 
+            return Regex.Replace(formattedLine, singlePropertyPattern, 
                 m => @event.Properties.TryGetValue(m.Groups[1].Value, out var value)
                     ? value.ToString() 
                     : m.Value);
         }
 
-        private ConversionPattern(string patternStr, bool replaceKeys)
+        private ConversionPattern([CanBeNull] string patternStr, bool replaceKeys)
         {
             PatternStr = patternStr;
             patternStr = string.IsNullOrEmpty(patternStr)
@@ -69,7 +70,7 @@ namespace Vostok.Logging.Core.Configuration
                     formatString = Regex.Replace(formatString, value, _ => $"{{{key}}}");
                 }
 
-                formatString = Regex.Replace(formatString, AllPropertiesPattern, _ => $"{{{patternKeys.Count}}}");
+                formatString = Regex.Replace(formatString, allPropertiesPattern, _ => $"{{{patternKeys.Count}}}");
             }
         }
 
@@ -102,7 +103,7 @@ namespace Vostok.Logging.Core.Configuration
             {4, "%(?:n|N)" }
         };
 
-        private const string SinglePropertyPattern = "%(?:p|P)\\((\\w*)\\)";
-        private const string AllPropertiesPattern = "%(?:p|P)(?!\\()";
+        private const string singlePropertyPattern = "%(?:p|P)\\((\\w*)\\)";
+        private const string allPropertiesPattern = "%(?:p|P)(?!\\()";
     }
 }

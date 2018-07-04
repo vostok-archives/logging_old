@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Vostok.Configuration.Abstractions.Validation;
 
 namespace Vostok.Logging.Core
 {
@@ -40,14 +39,6 @@ namespace Vostok.Logging.Core
             {
                 FilePath = filePath,
                 Exception = exception
-            });
-        }
-
-        public static SettingsValidationResult DirectoryNotFound(string directoryPath)
-        {
-            return new SettingsValidationResult(ValidationResultType.DirectoryNotFound, new
-            {
-                DirectoryPath = directoryPath
             });
         }
 
@@ -91,7 +82,6 @@ namespace Vostok.Logging.Core
             CapacityIsLessThanZero,
             FilePathIsNullOrEmpty,
             FilePathIsNotCorrect,
-            DirectoryNotFound,
             Success
         }
 

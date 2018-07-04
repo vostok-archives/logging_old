@@ -13,7 +13,7 @@ namespace Vostok.Logging.Abstractions
 #>
         #region <#=level #>
 
-        public static void <#=level #>(this ILog log, string message)
+        public static void <#=level #>(this ILog log, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.<#=level #>))
                 return;
@@ -21,7 +21,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.<#=level #>, DateTimeOffset.UtcNow, message));
         }
 
-        public static void <#=level #>(this ILog log, Exception exception)
+        public static void <#=level #>(this ILog log, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.<#=level #>))
                 return;
@@ -29,7 +29,7 @@ namespace Vostok.Logging.Abstractions
             log.Log(new LogEvent(LogLevel.<#=level #>, DateTimeOffset.UtcNow, null, exception: exception));
         }
 
-        public static void <#=level #>(this ILog log, Exception exception, string message)
+        public static void <#=level #>(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string message)
         {
             if (!log.IsEnabledFor(LogLevel.<#=level #>))
                 return;
@@ -38,7 +38,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void <#=level #><T>(this ILog log, string messageTemplate, T properties)
+        public static void <#=level #><T>(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.<#=level #>))
                 return;
@@ -53,7 +53,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void <#=level #>(this ILog log, string messageTemplate, params object[] parameters)
+        public static void <#=level #>(this ILog log, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.<#=level #>))
                 return;
@@ -62,7 +62,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void <#=level #><T>(this ILog log, Exception exception, string messageTemplate, T properties)
+        public static void <#=level #><T>(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] T properties)
         {
             if (!log.IsEnabledFor(LogLevel.<#=level #>))
                 return;
@@ -77,7 +77,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [StringFormatMethod("messageTemplate")]
-        public static void <#=level #>(this ILog log, Exception exception, string messageTemplate, params object[] parameters)
+        public static void <#=level #>(this ILog log, [CanBeNull] Exception exception, [CanBeNull] string messageTemplate, [CanBeNull] params object[] parameters)
         {
             if (!log.IsEnabledFor(LogLevel.<#=level #>))
                 return;
@@ -86,7 +86,7 @@ namespace Vostok.Logging.Abstractions
         }
 
         [Obsolete]
-        public static void <#=level #>(this ILog log, string message, Exception exception)
+        public static void <#=level #>(this ILog log, [CanBeNull] string message, [CanBeNull] Exception exception)
         {
             if (!log.IsEnabledFor(LogLevel.<#=level #>))
                 return;

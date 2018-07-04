@@ -6,7 +6,6 @@ using Vostok.Logging.Abstractions.Flow;
 
 namespace Vostok.Logging.Abstractions
 {
-    // CR(krait): Let's annotate everything public with NotNull or CanBeNull.
     public sealed class LogEvent
     {
         public LogLevel Level { get; }

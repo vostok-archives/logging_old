@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace Vostok.Logging.Core
 {
@@ -10,6 +11,7 @@ namespace Vostok.Logging.Core
         {
             items = new T[capacity];
             canDrain = new ManualResetEventSlim();
+            canDrainAsync = new TaskCompletionSource<bool>();
         }
 
         public bool TryAdd(T item)
@@ -30,7 +32,11 @@ namespace Vostok.Logging.Core
                         {
                             items[currentFrontPtr] = item;
                             if (currentCount == 0)
+                            {
                                 canDrain.Set();
+                                //TODO(mylov): canDrainAsync.Set() Hmm...
+                            }
+
                             return true;
                         }
                     }
@@ -44,6 +50,7 @@ namespace Vostok.Logging.Core
                 return 0;
 
             canDrain.Reset();
+            //TODO(mylov): canDrainAsync.Reset() Hmm...
 
             var resultCount = 0;
 
@@ -69,7 +76,13 @@ namespace Vostok.Logging.Core
             canDrain.Wait();
         }
 
+        public Task WaitForNewItemsAsync()
+        {
+            return canDrainAsync.Task;
+        }
+
         private readonly ManualResetEventSlim canDrain;
+        private readonly TaskCompletionSource<bool> canDrainAsync;
         private readonly T[] items;
         private int itemsCount;
         private int frontPtr;

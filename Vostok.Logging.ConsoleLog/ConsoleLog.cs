@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Vostok.Commons.Conversions;
 using Vostok.Commons.Synchronization;
@@ -58,6 +57,7 @@ namespace Vostok.Logging.ConsoleLog
                     {
                         // CR(krait): Nope, we must wait asynchronously here. Now we still waste a thread while waiting.
                         eventsBuffer.WaitForNewItems();
+                        //await eventsBuffer.WaitForNewItemsAsync();
                     }
                 }
             });

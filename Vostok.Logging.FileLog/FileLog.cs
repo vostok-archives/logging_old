@@ -69,6 +69,7 @@ namespace Vostok.Logging.FileLog
                     if (eventsBuffer.Count == 0)
                     {
                         eventsBuffer.WaitForNewItems();
+                        //await eventsBuffer.WaitForNewItemsAsync();
                     }
                 }
             });
@@ -94,6 +95,11 @@ namespace Vostok.Logging.FileLog
             var fileMode = settings.AppendToFile 
                 ? FileMode.Append 
                 : FileMode.OpenOrCreate;
+
+            var directory = Path.GetDirectoryName(fileName);
+
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
 
             var file = File.Open(fileName, fileMode, FileAccess.Write, FileShare.Read);
             return new StreamWriter(file, settings.Encoding);

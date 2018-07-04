@@ -56,11 +56,11 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void FileLogSettings_with_absent_FilePath_should_not_be_valid()
+        public void FileLogSettings_with_absent_FilePath_should_be_valid()
         {
             fileLogSettings.FilePath = "C:\\HelloWorld\\Hello";
 
-            fileLogSettings.Validate().IsSuccessful.Should().BeFalse();
+            fileLogSettings.Validate().IsSuccessful.Should().BeTrue();
         }
 
         [Test]

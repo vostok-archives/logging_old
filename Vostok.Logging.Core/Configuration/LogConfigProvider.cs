@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Text;
 using Vostok.Configuration;
 using Vostok.Configuration.Abstractions;
 using Vostok.Configuration.Binders;
 using Vostok.Configuration.Extensions;
 using Vostok.Configuration.Sources;
+using Vostok.Logging.Core.Configuration.Parsing;
 
 namespace Vostok.Logging.Core.Configuration
 {
@@ -40,7 +42,10 @@ namespace Vostok.Logging.Core.Configuration
 
         private static ConfigurationProvider GetConfiguredConfigProvider()
         {
-            var binder = new DefaultSettingsBinder().WithDefaultParsers().WithCustomParser<ConversionPattern>(ConversionPattern.TryParse);
+            var binder = new DefaultSettingsBinder()
+                .WithDefaultParsers()
+                .WithCustomParser<ConversionPattern>(ConversionPattern.TryParse)
+                .WithCustomParser<Encoding>(EncodingParser.TryParse);
             var configProviderSettings = new ConfigurationProviderSettings { Binder = binder, OnError = OnError };
             return new ConfigurationProvider(configProviderSettings);
         }
