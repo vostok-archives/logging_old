@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Vostok.Commons.Conversions;
+using Vostok.Commons.Synchronization;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Core;
 using Vostok.Logging.Core.Configuration;
@@ -14,6 +15,7 @@ namespace Vostok.Logging.ConsoleLog
         static ConsoleLog()
         {
             configProvider = new LogConfigProvider<ConsoleLogSettings>(configSectionName);
+            isInitialized = new AtomicBoolean(false);
         }
 
         public static void Configure(ConsoleLogSettings settings)
@@ -26,7 +28,7 @@ namespace Vostok.Logging.ConsoleLog
             if (@event == null)
                 return;
 
-            if (!IsInitialized)
+            if (!isInitialized)
                 Initialize();
 
             eventsBuffer.TryAdd(@event);
@@ -66,7 +68,7 @@ namespace Vostok.Logging.ConsoleLog
             var buffer = eventsBuffer;
             var eventsToWrite = currentEventsBuffer;
 
-            if (settings.EventsQueueCapacity != capacity)
+            if (settings.EventsQueueCapacity != currentEventsBuffer.Length)
                 ReinitEventsQueue(settings);
 
             var eventsCount = buffer.Drain(eventsToWrite, 0, eventsToWrite.Length);
@@ -82,7 +84,7 @@ namespace Vostok.Logging.ConsoleLog
 
         private static void Initialize()
         {
-            if (Interlocked.CompareExchange(ref isInitializedFlag, 1, 0) != isInitializedFlag)
+            if (isInitialized.TrySetTrue())
             {
                 ReinitEventsQueue(configProvider.Settings);
                 StartNewLoggingThread();
@@ -91,9 +93,8 @@ namespace Vostok.Logging.ConsoleLog
 
         private static void ReinitEventsQueue(ConsoleLogSettings settings)
         {
-            capacity = settings.EventsQueueCapacity;
-            currentEventsBuffer = new LogEvent[capacity];
-            eventsBuffer = new BoundedBuffer<LogEvent>(capacity);
+            currentEventsBuffer = new LogEvent[settings.EventsQueueCapacity];
+            eventsBuffer = new BoundedBuffer<LogEvent>(settings.EventsQueueCapacity);
         }
 
         private static readonly Dictionary<LogLevel, ConsoleColor> levelToColor = new Dictionary<LogLevel, ConsoleColor>
@@ -105,14 +106,10 @@ namespace Vostok.Logging.ConsoleLog
             {LogLevel.Fatal, ConsoleColor.Red}
         };
 
-        // CR(krait): Switch to AtomicBoolean.
-        private static bool IsInitialized => isInitializedFlag == 1;
-
-        private static int isInitializedFlag;
+        private static readonly AtomicBoolean isInitialized;
 
         private static ILogConfigProvider<ConsoleLogSettings> configProvider;
 
-        private static int capacity; // CR(krait): This field can be replaced with currentEventsBuffer.Length
         private static volatile LogEvent[] currentEventsBuffer;
         private static volatile BoundedBuffer<LogEvent> eventsBuffer;
 

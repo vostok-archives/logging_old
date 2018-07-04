@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Vostok.Commons.Conversions;
+using Vostok.Commons.Synchronization;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Core;
 using Vostok.Logging.Core.Configuration;
@@ -14,6 +14,7 @@ namespace Vostok.Logging.FileLog
         static FileLog()
         {
             configProvider = new LogConfigProvider<FileLogSettings>(configSectionName);
+            isInitialized = new AtomicBoolean(false);
         }
 
         public static void Configure(FileLogSettings settings)
@@ -26,7 +27,7 @@ namespace Vostok.Logging.FileLog
             if (@event == null)
                 return;
 
-            if(!IsInitialized)
+            if(!isInitialized)
                 Initialize();
 
             eventsBuffer.TryAdd(@event);
@@ -103,7 +104,7 @@ namespace Vostok.Logging.FileLog
             var buffer = eventsBuffer;
             var eventsToWrite = currentEventsBuffer;
 
-            if (settings.EventsQueueCapacity != capacity)
+            if (settings.EventsQueueCapacity != currentEventsBuffer.Length)
                 ReinitEventsQueue(settings);
 
             var eventsCount = buffer.Drain(eventsToWrite, 0, eventsToWrite.Length);
@@ -117,7 +118,7 @@ namespace Vostok.Logging.FileLog
 
         private static void Initialize()
         {
-            if (Interlocked.CompareExchange(ref isInitializedFlag, 1, 0) != isInitializedFlag)
+            if (isInitialized.TrySetTrue())
             {
                 ReinitEventsQueue(configProvider.Settings);
                 StartNewLoggingThread();
@@ -126,18 +127,14 @@ namespace Vostok.Logging.FileLog
 
         private static void ReinitEventsQueue(FileLogSettings settings)
         {
-            capacity = settings.EventsQueueCapacity;
-            currentEventsBuffer = new LogEvent[capacity];
-            eventsBuffer = new BoundedBuffer<LogEvent>(capacity);
+            currentEventsBuffer = new LogEvent[settings.EventsQueueCapacity];
+            eventsBuffer = new BoundedBuffer<LogEvent>(settings.EventsQueueCapacity);
         }
 
-        private static bool IsInitialized => isInitializedFlag == 1;
-
-        private static int isInitializedFlag;
+        private static readonly AtomicBoolean isInitialized;
 
         private static ILogConfigProvider<FileLogSettings> configProvider;
 
-        private static int capacity;
         private static LogEvent[] currentEventsBuffer;
         private static BoundedBuffer<LogEvent> eventsBuffer;
 

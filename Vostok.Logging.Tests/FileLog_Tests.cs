@@ -152,18 +152,18 @@ namespace Vostok.Logging.Tests
         [TearDown]
         public void TearDown()
         {
-            Task.Run(() =>
-                {
-                    settings.FilePath = "temp";
-                    settings.EnableRolling = false;
-                    settings.ConversionPattern = ConversionPattern.FromString(string.Empty);
-                    UpdateSettings(settings);
-                    log.Info(string.Empty);
-                });
-
+            UpdateSettings(TempFileSettings);
+            log.Info(string.Empty);
             createdFiles.ForEach(DeleteFile);
             createdFiles.Clear();
         }
+
+        private static FileLogSettings TempFileSettings => new FileLogSettings
+        {
+            FilePath = "temp",
+            EnableRolling = false,
+            ConversionPattern = ConversionPattern.FromString(string.Empty)
+        };
 
         private static void DeleteFile(string fileName)
         {

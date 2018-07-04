@@ -6,12 +6,10 @@ using Vostok.Logging.Abstractions;
 
 namespace Vostok.Logging.Tests
 {
-    // CR(krait): 1. It's called 'WithProperty' now.
-    // CR(krait): 2. It's been moved to LogEvent.
-    internal class LogEventExtensions_Tests
+    internal class LogEvent_Tests
     {
         [Test]
-        public void SetProperty_should_add_absent_property_to_log_event_properties()
+        public void WithProperty_should_add_absent_property_to_log_event_properties()
         {
             var @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message", new Dictionary<string, object>{{"A", 1}});
             @event  = @event.WithProperty("B", 2);
@@ -19,7 +17,7 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void SetProperty_should_rewrite_existed_property()
+        public void WithProperty_should_rewrite_existed_property()
         {
             var @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message", new Dictionary<string, object> { { "A", 1 } });
             @event = @event.WithProperty("A", 2);
@@ -28,7 +26,7 @@ namespace Vostok.Logging.Tests
 
         // CR(krait): It's always 'ignorecased' now.
         [Test]
-        public void SetProperty_should_not_rewrite_property_if_such_property_in_other_case_exists_and_collection_is_ignorecased()
+        public void WithProperty_should_not_rewrite_property_if_such_property_in_other_case_exists_and_collection_is_ignorecased()
         {
             var @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message", new Dictionary<string, object>(StringComparer.CurrentCultureIgnoreCase) { { "A", 1 } });
             @event = @event.WithProperty("a", 2);
@@ -36,7 +34,7 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void SetProperty_should_create_new_properties_if_event_has_no_properties()
+        public void WithProperty_should_create_new_properties_if_event_has_no_properties()
         {
             var @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message");
             @event = @event.WithProperty("A", 1);

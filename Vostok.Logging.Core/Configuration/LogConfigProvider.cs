@@ -2,6 +2,7 @@
 using Vostok.Configuration;
 using Vostok.Configuration.Abstractions;
 using Vostok.Configuration.Binders;
+using Vostok.Configuration.Extensions;
 using Vostok.Configuration.Sources;
 
 namespace Vostok.Logging.Core.Configuration
@@ -23,8 +24,7 @@ namespace Vostok.Logging.Core.Configuration
             }
         }
 
-        // CR(krait): Use new XmlFileSource(fileName).ScopeTo(...)
-        public LogConfigProvider(string fileName, string sectionName) : this(new ScopedSource(new XmlFileSource(fileName), configurationTagName, sectionName)) { }
+        public LogConfigProvider(string fileName, string sectionName) : this(new XmlFileSource(fileName).ScopeTo(configurationTagName, sectionName)) { }
 
         public LogConfigProvider(string sectionName) : this(AppConfigFileName, sectionName) { }
 
