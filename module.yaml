@@ -1,25 +1,23 @@
-default:
+sdk *default:
   build:
     target: Vostok.Logging.sln
-    configuration: Release
+    configuration: NoTests
     tool:
       name: dotnet
 
   install:
-    - Vostok.Logging/bin/Release/netstandard2.0/Vostok.Logging.dll
+    - Vostok.Logging.Abstractions/bin/Release/netstandard2.0/Vostok.Logging.Abstractions.dll
+    - Vostok.Logging.Core/bin/Release/netstandard2.0/Vostok.Logging.Core.dll
+    - Vostok.Logging.ConsoleLog/bin/Release/netstandard2.0/Vostok.Logging.ConsoleLog.dll
+    - Vostok.Logging.FileLog/bin/Release/netstandard2.0/Vostok.Logging.FileLog.dll
     - module vostok.commons
+    - module vostok.configuration
 
   deps:
     - vostok.commons@dev
-
-notests *default:
-  deps:
     - vostok.configuration@dev
-  build:
-    configuration: NoTests
 
-full-build:
-  deps:
-    - vostok.configuration@dev
+full-build > sdk:
   build:
+    target: Vostok.Logging.sln
     configuration: Release
