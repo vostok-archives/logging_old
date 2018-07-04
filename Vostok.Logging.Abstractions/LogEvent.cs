@@ -36,7 +36,7 @@ namespace Vostok.Logging.Abstractions
             Exception = exception;
         }
 
-        public LogEvent WithProperty<T>(string key, T value)
+        public LogEvent WithProperty<T>([NotNull] string key, [NotNull] T value)
         {
             var properties = Properties == null 
                 ? CreateProperties().Set(key, value)

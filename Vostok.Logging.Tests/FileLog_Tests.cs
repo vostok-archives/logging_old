@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
 using Vostok.Logging.Abstractions;
@@ -13,7 +12,6 @@ using Vostok.Logging.FileLog;
 
 namespace Vostok.Logging.Tests
 {
-    // CR(krait): Fix tests.
     [TestFixture]
     internal class FileLog_Tests
     {
@@ -39,8 +37,7 @@ namespace Vostok.Logging.Tests
             WaitForOperationCanceled();
 
             var oldFilePath = settings.FilePath;
-            settings.FilePath = $"{Guid.NewGuid().ToString().Substring(0, 8)}.log";
-            UpdateSettings(settings);
+            UpdateSettings(s => s.FilePath = $"{Guid.NewGuid().ToString().Substring(0, 8)}.log");
 
             log.Info(messages[1]);
             WaitForOperationCanceled();
@@ -60,8 +57,7 @@ namespace Vostok.Logging.Tests
             log.Info(messages[0]);
             WaitForOperationCanceled();
 
-            settings.AppendToFile = false;
-            UpdateSettings(settings);
+            UpdateSettings(s => s.AppendToFile = false);
 
             log.Info(messages[1]);
             WaitForOperationCanceled();
@@ -79,8 +75,7 @@ namespace Vostok.Logging.Tests
             log.Info(messages[0]);
             WaitForOperationCanceled();
 
-            settings.EnableRolling = true;
-            UpdateSettings(settings);
+            UpdateSettings(s => s.EnableRolling = true);
 
             log.Info(messages[1]);
             WaitForOperationCanceled();
@@ -100,8 +95,7 @@ namespace Vostok.Logging.Tests
             log.Info(messages[0], new { trace = 134 });
             WaitForOperationCanceled();
 
-            settings.ConversionPattern = ConversionPattern.FromString("%l %p(trace) %m%n");
-            UpdateSettings(settings);
+            UpdateSettings(s => s.ConversionPattern = ConversionPattern.FromString("%l %p(trace) %m%n"));
 
             log.Info(messages[1], new { trace = 134 });
             WaitForOperationCanceled();
@@ -123,8 +117,7 @@ namespace Vostok.Logging.Tests
             log.Info(messages[0]);
             WaitForOperationCanceled();
 
-            settings.Encoding = Encoding.Unicode;
-            UpdateSettings(settings);
+            UpdateSettings(s => s.Encoding = Encoding.Unicode);
 
             log.Info(messages[1]);
             WaitForOperationCanceled();
@@ -183,10 +176,28 @@ namespace Vostok.Logging.Tests
             }
         }
 
-        private static void UpdateSettings(FileLogSettings settingsPatch)
+        private void UpdateSettings(FileLogSettings settingsPatch)
         {
-            FileLog.FileLog.Configure(settingsPatch);
+            settings = settingsPatch;
+            FileLog.FileLog.Configure(settings);
             WaitForOperationCanceled();
+        }
+
+        private void UpdateSettings(Action<FileLogSettings> settingsPatch)
+        {
+            var copy = new FileLogSettings
+            {
+                FilePath = settings.FilePath,
+                ConversionPattern = settings.ConversionPattern,
+                EnableRolling = settings.EnableRolling,
+                AppendToFile = settings.AppendToFile,
+                Encoding = settings.Encoding,
+                EventsQueueCapacity = settings.EventsQueueCapacity
+            };
+
+            settingsPatch(copy);
+
+            UpdateSettings(copy);
         }
 
         private static void WaitForOperationCanceled()
