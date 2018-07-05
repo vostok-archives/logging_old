@@ -14,6 +14,7 @@
       <group targetFramework=".NETStandard2.0">
         <dependency id="Vostok.Logging.Abstractions" version="0.0.1" />
         <dependency id="Vostok.Commons" version="0.0.1" />
+        <dependency id="Vostok.Configuration.Abstractions" version="0.0.3" />
       </group>
     </dependencies>
   </metadata>

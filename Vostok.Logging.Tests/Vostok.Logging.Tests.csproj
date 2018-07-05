@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFrameworks>netcoreapp2.0;net471</TargetFrameworks>
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
@@ -14,10 +14,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Vostok.Logging.Abstractions\Vostok.Logging.Abstractions.csproj" />
     <ProjectReference Include="..\Vostok.Logging.ConsoleLog\Vostok.Logging.ConsoleLog.csproj" />
     <ProjectReference Include="..\Vostok.Logging.Core\Vostok.Logging.Core.csproj" />
     <ProjectReference Include="..\Vostok.Logging.FileLog\Vostok.Logging.FileLog.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Vostok.Logging.Abstractions">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\vostok.logging.abstractions\Vostok.Logging.Abstractions\bin\Release\netstandard2.0\Vostok.Logging.Abstractions.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

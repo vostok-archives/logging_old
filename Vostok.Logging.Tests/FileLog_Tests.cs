@@ -215,7 +215,7 @@ namespace Vostok.Logging.Tests
             using (var file = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var reader = new StreamReader(file))
             {
-                return reader.ReadToEnd().Split(Environment.NewLine).Where(s => !string.IsNullOrEmpty(s));
+                return reader.ReadToEnd().Split(Environment.NewLine.ToArray()).Where(s => !string.IsNullOrEmpty(s));
             }
         }
 
