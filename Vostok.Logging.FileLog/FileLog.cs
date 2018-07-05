@@ -68,8 +68,7 @@ namespace Vostok.Logging.FileLog
 
                     if (eventsBuffer.Count == 0)
                     {
-                        eventsBuffer.WaitForNewItems();
-                        //await eventsBuffer.WaitForNewItemsAsync();
+                        await eventsBuffer.WaitForNewItemsAsync();
                     }
                 }
             });

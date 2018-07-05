@@ -55,9 +55,7 @@ namespace Vostok.Logging.ConsoleLog
 
                     if (eventsBuffer.Count == 0)
                     {
-                        // CR(krait): Nope, we must wait asynchronously here. Now we still waste a thread while waiting.
-                        eventsBuffer.WaitForNewItems();
-                        //await eventsBuffer.WaitForNewItemsAsync();
+                        await eventsBuffer.WaitForNewItemsAsync();
                     }
                 }
             });

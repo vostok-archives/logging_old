@@ -10,7 +10,6 @@ namespace Vostok.Logging.Core
         public BoundedBuffer(int capacity)
         {
             items = new T[capacity];
-            canDrain = new ManualResetEventSlim();
             canDrainAsync = new TaskCompletionSource<bool>();
         }
 
@@ -33,8 +32,7 @@ namespace Vostok.Logging.Core
                             items[currentFrontPtr] = item;
                             if (currentCount == 0)
                             {
-                                canDrain.Set();
-                                //TODO(mylov): canDrainAsync.Set() Hmm...
+                                canDrainAsync.TrySetResult(true);
                             }
 
                             return true;
@@ -49,8 +47,7 @@ namespace Vostok.Logging.Core
             if (itemsCount == 0)
                 return 0;
 
-            canDrain.Reset();
-            //TODO(mylov): canDrainAsync.Reset() Hmm...
+            canDrainAsync = new TaskCompletionSource<bool>();
 
             var resultCount = 0;
 
@@ -71,18 +68,12 @@ namespace Vostok.Logging.Core
             return resultCount;
         }
 
-        public void WaitForNewItems()
-        {
-            canDrain.Wait();
-        }
-
         public Task WaitForNewItemsAsync()
         {
             return canDrainAsync.Task;
         }
 
-        private readonly ManualResetEventSlim canDrain;
-        private readonly TaskCompletionSource<bool> canDrainAsync;
+        private TaskCompletionSource<bool> canDrainAsync;
         private readonly T[] items;
         private int itemsCount;
         private int frontPtr;
