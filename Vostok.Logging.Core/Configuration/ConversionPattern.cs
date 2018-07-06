@@ -10,6 +10,7 @@ namespace Vostok.Logging.Core.Configuration
 {
     public class ConversionPattern
     {
+        private const int PrefixFormatNumber = 5;
         public string PatternStr { get; }
 
         public static ConversionPattern FromString([CanBeNull] string patternStr)
@@ -37,12 +38,17 @@ namespace Vostok.Logging.Core.Configuration
             var exception = @event.Exception;
             var newLine = Environment.NewLine;
 
+            object prefix = null;
+            @event.Properties?.TryGetValue("prefix", out prefix);
+            if (prefix != null && !formatString.StartsWith($"[{{{PrefixFormatNumber}}}]"))
+                formatString = $"[{{{PrefixFormatNumber}}}] {formatString}";
+
             var properties = @event.Properties != null 
                 ? string.Join(", ", @event.Properties.Values
-                    .Select(p => (p as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? p.ToString())) 
+                    .Select(p => (p as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? p.ToString()))
                 : null;
 
-            var formattedLine = string.Format(formatString, timestamp, level, message, exception, newLine, properties);
+            var formattedLine = string.Format(formatString, timestamp, level, message, exception, newLine, prefix, properties);
 
             if (@event.Properties == null)
                 return formattedLine;
@@ -92,7 +98,7 @@ namespace Vostok.Logging.Core.Configuration
             return formatString.Equals(other.formatString, StringComparison.CurrentCultureIgnoreCase);
         }
 
-        private readonly string formatString;
+        private string formatString;
 
         private static readonly Dictionary<int, string> patternKeys = new Dictionary<int, string>
         {
@@ -100,7 +106,8 @@ namespace Vostok.Logging.Core.Configuration
             {1, "%(?:l|L)" },
             {2, "%(?:m|M)" },
             {3, "%(?:e|E)" },
-            {4, "%(?:n|N)" }
+            {4, "%(?:n|N)" },
+            {PrefixFormatNumber, "%(?:x|X)" }
         };
 
         private const string singlePropertyPattern = "%(?:p|P)\\((\\w*)\\)";
