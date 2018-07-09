@@ -18,6 +18,7 @@
     <ProjectReference Include="..\Vostok.Logging.ConsoleLog\Vostok.Logging.ConsoleLog.csproj" />
     <ProjectReference Include="..\Vostok.Logging.Core\Vostok.Logging.Core.csproj" />
     <ProjectReference Include="..\Vostok.Logging.FileLog\Vostok.Logging.FileLog.csproj" />
+    <ProjectReference Include="..\Vostok.Logging.Log4net\Vostok.Logging.Log4net.csproj" />
   </ItemGroup>
 
   <ItemGroup>

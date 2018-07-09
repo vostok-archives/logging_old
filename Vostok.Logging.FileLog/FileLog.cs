@@ -35,6 +35,8 @@ namespace Vostok.Logging.FileLog
 
         public bool IsEnabledFor(LogLevel level) => true;
 
+        public ILog ForContext(string context) => this;
+
         private static void StartNewLoggingThread()
         {
             Task.Run(async () =>

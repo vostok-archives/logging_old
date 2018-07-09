@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Configurations>Debug;Release</Configurations>
+    <LangVersion>7.2</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NuspecFile>Vostok.Logging.Log4net.nuspec</NuspecFile>
+    <Version>0.0.0</Version>
+    <Authors>Vostok team</Authors>
+    <Company>SKB Kontur</Company>
+    <Product>Vostok</Product>
+    <Copyright>Copyright (c) 2017-2018 SKB Kontur</Copyright>
+    <PackageLicenseUrl>https://github.com/vostok/logging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/vostok/logging</PackageProjectUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.8" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Vostok.Logging.Abstractions\Vostok.Logging.Abstractions.csproj" />
+    <ProjectReference Include="..\Vostok.Logging.Core\Vostok.Logging.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Vostok.Commons">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\vostok.commons\Vostok.Commons\bin\Release\netstandard2.0\Vostok.Commons.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
