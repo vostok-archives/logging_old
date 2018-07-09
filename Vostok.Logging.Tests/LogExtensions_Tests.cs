@@ -10,27 +10,18 @@ using Vostok.Logging.Abstractions;
 
 namespace Vostok.Logging.Tests
 {
-    [TestFixture(LogLevel.Debug)]
-    [TestFixture(LogLevel.Info)]
-    [TestFixture(LogLevel.Warn)]
-    [TestFixture(LogLevel.Error)]
-    [TestFixture(LogLevel.Fatal)]
+    [TestFixture]
     internal class LogExtensions_Tests
     {
-        public LogExtensions_Tests(LogLevel level)
-        {
-            this.level = level;
-        }
-
         [Test]
-        public void LogMethod_should_work_correctly_for_arguments_message()
+        public void LogMethod_should_work_correctly_for_arguments_message([Values] LogLevel level)
         {
             var method = GetLogMethod(level, typeof(ILog), typeof(string));
 
             method.Invoke(null, new object[] { log, message });
             log.Received(0).Log(Arg.Any<LogEvent>());
 
-            SetLogEnabledForCurrentLevel(true);
+            SetLogEnabledForCurrentLevel(level, true);
             method.Invoke(null, new object[] { log, message });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
@@ -40,14 +31,14 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void LogMethod_should_work_correctly_for_arguments_exception()
+        public void LogMethod_should_work_correctly_for_arguments_exception([Values] LogLevel level)
         {
             var method = GetLogMethod(level, typeof(ILog), typeof(Exception));
 
             method.Invoke(null, new object[] { log, exception });
             log.Received(0).Log(Arg.Any<LogEvent>());
 
-            SetLogEnabledForCurrentLevel(true);
+            SetLogEnabledForCurrentLevel(level, true);
             method.Invoke(null, new object[] { log, exception });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
@@ -57,14 +48,14 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void LogMethod_should_work_correctly_for_arguments_exception_message()
+        public void LogMethod_should_work_correctly_for_arguments_exception_message([Values] LogLevel level)
         {
             var method = GetLogMethod(level, typeof(ILog), typeof(Exception), typeof(string));
 
             method.Invoke(null, new object[] { log, exception, message });
             log.Received(0).Log(Arg.Any<LogEvent>());
 
-            SetLogEnabledForCurrentLevel(true);
+            SetLogEnabledForCurrentLevel(level, true);
             method.Invoke(null, new object[] { log, exception, message });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
@@ -74,7 +65,7 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void LogMethod_should_work_correctly_for_arguments_message_properties()
+        public void LogMethod_should_work_correctly_for_arguments_message_properties([Values] LogLevel level)
         {
             var method = GetLogMethodWithSingleGenericParameter(level, typeof(ILog), typeof(string));
             method = method.MakeGenericMethod(new {A = 1}.GetType());
@@ -82,7 +73,7 @@ namespace Vostok.Logging.Tests
             method.Invoke(null, new object[] { log, message, new { A = 1 } });
             log.Received(0).Log(Arg.Any<LogEvent>());
 
-            SetLogEnabledForCurrentLevel(true);
+            SetLogEnabledForCurrentLevel(level, true);
             method.Invoke(null, new object[] { log, message, new { A = 1 } });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
@@ -92,7 +83,7 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void LogMethod_should_use_non_anonymous_class_argument_like_parameter_for_arguments_message_properies()
+        public void LogMethod_should_use_non_anonymous_class_argument_like_parameter_for_arguments_message_properies([Values] LogLevel level)
         {
             var method = GetLogMethodWithSingleGenericParameter(level, typeof(ILog), typeof(string));
             method = method.MakeGenericMethod(new CustomClass().GetType());
@@ -101,13 +92,13 @@ namespace Vostok.Logging.Tests
             method.Invoke(null, new object[] { log, message, obj });
             log.Received(0).Log(Arg.Any<LogEvent>());
 
-            SetLogEnabledForCurrentLevel(true);
+            SetLogEnabledForCurrentLevel(level, true);
             method.Invoke(null, new object[] { log, message, obj });
             log.Received(1).Log(Arg.Is<LogEvent>(e => e.Properties.SequenceEqual(new Dictionary<string, object> { { "0", obj } })));
         }
 
         [Test]
-        public void LogMethod_should_work_correctly_for_arguments_message_parameters()
+        public void LogMethod_should_work_correctly_for_arguments_message_parameters([Values] LogLevel level)
         {
             var method = GetLogMethod(level, typeof(ILog), typeof(string), typeof(object[]));
 
@@ -115,7 +106,7 @@ namespace Vostok.Logging.Tests
             method.Invoke(null, new object[] { log, message, new[] { obj } });
             log.Received(0).Log(Arg.Any<LogEvent>());
 
-            SetLogEnabledForCurrentLevel(true);
+            SetLogEnabledForCurrentLevel(level, true);
             method.Invoke(null, new object[] { log, message, new[] { obj } });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
@@ -125,7 +116,7 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void LogMethod_should_work_correctly_for_arguments_exception_message_properties()
+        public void LogMethod_should_work_correctly_for_arguments_exception_message_properties([Values] LogLevel level)
         {
             var method = GetLogMethodWithSingleGenericParameter(level, typeof(ILog), typeof(Exception), typeof(string));
             method = method.MakeGenericMethod(new { A = 1 }.GetType());
@@ -133,7 +124,7 @@ namespace Vostok.Logging.Tests
             method.Invoke(null, new object[] { log, exception, message, new { A = 1 } });
             log.Received(0).Log(Arg.Any<LogEvent>());
 
-            SetLogEnabledForCurrentLevel(true);
+            SetLogEnabledForCurrentLevel(level, true);
             method.Invoke(null, new object[] { log, exception, message, new { A = 1 } });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
@@ -143,7 +134,7 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void LogMethod_should_use_non_anonymous_class_argument_like_parameter_for_arguments_exception_message_properies()
+        public void LogMethod_should_use_non_anonymous_class_argument_like_parameter_for_arguments_exception_message_properies([Values] LogLevel level)
         {
             var method = GetLogMethodWithSingleGenericParameter(level, typeof(ILog), typeof(Exception), typeof(string));
             method = method.MakeGenericMethod(new CustomClass().GetType());
@@ -152,13 +143,13 @@ namespace Vostok.Logging.Tests
             method.Invoke(null, new object[] { log, exception, message, obj });
             log.Received(0).Log(Arg.Any<LogEvent>());
 
-            SetLogEnabledForCurrentLevel(true);
+            SetLogEnabledForCurrentLevel(level, true);
             method.Invoke(null, new object[] { log, exception, message, obj });
             log.Received(1).Log(Arg.Is<LogEvent>(e => e.Properties.SequenceEqual(new Dictionary<string, object> { { "0", obj } })));
         }
 
         [Test]
-        public void LogMethod_should_work_correctly_for_arguments_exception_message_parameters()
+        public void LogMethod_should_work_correctly_for_arguments_exception_message_parameters([Values] LogLevel level)
         {
             var method = GetLogMethod(level, typeof(ILog), typeof(Exception), typeof(string), typeof(object[]));
 
@@ -166,7 +157,7 @@ namespace Vostok.Logging.Tests
             method.Invoke(null, new object[] { log, exception, message, new[] { obj } });
             log.Received(0).Log(Arg.Any<LogEvent>());
 
-            SetLogEnabledForCurrentLevel(true);
+            SetLogEnabledForCurrentLevel(level, true);
             method.Invoke(null, new object[] { log, exception, message, new[] { obj } });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
@@ -176,14 +167,14 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void ObsoleteLogMethod_should_work_correctly_for_arguments_message_exception()
+        public void ObsoleteLogMethod_should_work_correctly_for_arguments_message_exception([Values] LogLevel level)
         {
             var method = GetLogMethod(level, typeof(ILog), typeof(string), typeof(Exception));
 
             method.Invoke(null, new object[] { log, message, exception });
             log.Received(0).Log(Arg.Any<LogEvent>());
 
-            SetLogEnabledForCurrentLevel(true);
+            SetLogEnabledForCurrentLevel(level, true);
             method.Invoke(null, new object[] { log, message, exception });
             log.Received(1).Log(Arg.Is<LogEvent>(e =>
                 e.Level == level &&
@@ -232,7 +223,7 @@ namespace Vostok.Logging.Tests
                 });
         }
 
-        private void SetLogEnabledForCurrentLevel(bool isEnabled)
+        private void SetLogEnabledForCurrentLevel(LogLevel level, bool isEnabled)
         {
             log.IsEnabledFor(level).Returns(isEnabled);
         }
@@ -240,8 +231,6 @@ namespace Vostok.Logging.Tests
         private ILog log;
         private Exception exception;
         private string message;
-
-        private readonly LogLevel level;
 
         private class CustomClass { }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using Vostok.Logging.Abstractions;
@@ -10,16 +11,11 @@ namespace Vostok.Logging.Tests
     [TestFixture]
     internal class ConversionPattern_Tests
     {
-        [TestCase(LogLevel.Debug)]
-        [TestCase(LogLevel.Info)]
-        [TestCase(LogLevel.Warn)]
-        [TestCase(LogLevel.Error)]
-        [TestCase(LogLevel.Fatal)]
-        public void Format_should_return_correct_string_for_default_pattern(LogLevel level)
+        public void Format_should_return_correct_string_for_default_pattern([Values] LogLevel level)
         {
             var pattern = ConversionPattern.Default;
             var exception = new Exception("AnyException");
-            var @event = new LogEvent(level, DateTimeOffset.UtcNow, "aaa{prop}bbb", new Dictionary<string, object>{{"prop", "ccc"}}, exception);
+            var @event = new LogEvent(level, DateTimeOffset.UtcNow, null, exception).WithProperty("prop", "ccc");
 
             var timestamp = @event.Timestamp.ToString("HH:mm:ss zzz");
             var formattedMessage = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
@@ -45,12 +41,7 @@ namespace Vostok.Logging.Tests
             pattern.Format(@event).Should().Be($"{@event.Timestamp:HH:mm:ss zzz}");
         }
 
-        [TestCase(LogLevel.Debug)]
-        [TestCase(LogLevel.Info)]
-        [TestCase(LogLevel.Warn)]
-        [TestCase(LogLevel.Error)]
-        [TestCase(LogLevel.Fatal)]
-        public void Format_should_return_correct_string_for_level_key_in_template(LogLevel level)
+        public void Format_should_return_correct_string_for_level_key_in_template([Values] LogLevel level)
         {
             var pattern = ConversionPattern.FromString("%l");
             var @event = GenerateEvent(level);
@@ -58,12 +49,7 @@ namespace Vostok.Logging.Tests
             pattern.Format(@event).Should().Be($"{level}");
         }
 
-        [TestCase(LogLevel.Debug)]
-        [TestCase(LogLevel.Info)]
-        [TestCase(LogLevel.Warn)]
-        [TestCase(LogLevel.Error)]
-        [TestCase(LogLevel.Fatal)]
-        public void Format_should_return_correct_string_for_upper_cased_level_key_in_template(LogLevel level)
+        public void Format_should_return_correct_string_for_upper_cased_level_key_in_template([Values] LogLevel level)
         {
             var pattern = ConversionPattern.FromString("%L");
             var @event = GenerateEvent(level);
@@ -242,17 +228,18 @@ namespace Vostok.Logging.Tests
 
         private static LogEvent GenerateEvent(Exception exception)
         {
-            return new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, null, null, exception);
+            return new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, null, exception);
         }
 
         private static LogEvent GenerateEvent(IReadOnlyDictionary<string, object> properties)
         {
-            return new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, null, properties);
+            return properties.Aggregate(new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, null), (e, prop) => e.WithProperty(prop.Key, prop.Value));
         }
 
         private static LogEvent GenerateEvent(string messageTemplate, IReadOnlyDictionary<string, object> properties = null)
         {
-            return new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, messageTemplate, properties);
+            var @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, messageTemplate);
+            return properties?.Aggregate(@event, (e, prop) => e.WithProperty(prop.Key, prop.Value)) ?? @event;
         }
     }
 }
