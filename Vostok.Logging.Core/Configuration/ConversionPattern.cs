@@ -11,6 +11,9 @@ namespace Vostok.Logging.Core.Configuration
     public class ConversionPattern
     {
         private const int PrefixFormatNumber = 5;
+        private const string PrefixPropertyName = "prefix";
+        private readonly string prefixStringFormat = $"[{{{PrefixFormatNumber}}}]";
+
         public string PatternStr { get; }
 
         public static ConversionPattern FromString([CanBeNull] string patternStr)
@@ -39,9 +42,9 @@ namespace Vostok.Logging.Core.Configuration
             var newLine = Environment.NewLine;
 
             object prefix = null;
-            @event.Properties?.TryGetValue("prefix", out prefix);
-            if (prefix != null && !formatString.StartsWith($"[{{{PrefixFormatNumber}}}]"))
-                formatString = $"[{{{PrefixFormatNumber}}}] {formatString}";
+            @event.Properties?.TryGetValue(PrefixPropertyName, out prefix);
+            if (prefix != null && !formatString.StartsWith(prefixStringFormat))
+                formatString = $"{prefixStringFormat} {formatString}";
 
             var properties = @event.Properties != null 
                 ? string.Join(", ", @event.Properties.Values
@@ -107,7 +110,7 @@ namespace Vostok.Logging.Core.Configuration
             {2, "%(?:m|M)" },
             {3, "%(?:e|E)" },
             {4, "%(?:n|N)" },
-            {PrefixFormatNumber, "%(?:x|X)" }
+            {/*5*/PrefixFormatNumber, "%(?:x|X)" }
         };
 
         private const string singlePropertyPattern = "%(?:p|P)\\((\\w*)\\)";

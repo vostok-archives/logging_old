@@ -107,7 +107,7 @@ namespace Vostok.Logging.Tests
         }
 
         [Test]
-        public void FileLog_should_change_notes_format_if_ConversionPattern_was_updated_with_prefix()
+        public void FileLog_should_change_notes_format_if_ConversionPattern_was_updated_with_manual_prefix()
         {
             var messages = new[] { "Hello, World 1", "Hello, World 2" };
 
@@ -165,6 +165,29 @@ namespace Vostok.Logging.Tests
             createdFiles.Add(settings.FilePath);
 
             ReadAllLines(settings.FilePath).Should().BeEquivalentTo($"[prefix1] {messages[0]}", $"[prefix2] Info 134 {messages[1]}");
+        }
+
+        [Test]
+        public void FileLog_with_subcontext()
+        {
+            var messages = new[] { "Hello, World 1", "Hello, World 2" };
+
+            var conLog = new ContextualPrefixedILogWrapper(log);
+            using (new ContextualLogPrefix("prefix1"))
+            using (new ContextualLogPrefix("prefix1.1"))
+                conLog.Info(messages[0], new { trace = 134 });
+            WaitForOperationCanceled();
+
+            UpdateSettings(s => s.ConversionPattern = ConversionPattern.FromString("%l %p(trace) %m%n"));
+
+            using (new ContextualLogPrefix("prefix2"))
+            using (new ContextualLogPrefix("prefix2.2"))
+                conLog.Info(messages[1], new { trace = 134 });
+            WaitForOperationCanceled();
+
+            createdFiles.Add(settings.FilePath);
+
+            ReadAllLines(settings.FilePath).Should().BeEquivalentTo($"[prefix1.1] {messages[0]}", $"[prefix2.2] Info 134 {messages[1]}");
         }
 
         [SetUp]
