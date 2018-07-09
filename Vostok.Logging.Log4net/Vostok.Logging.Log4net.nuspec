@@ -12,9 +12,9 @@
     <copyright>Copyright (c) 2017-2018 SKB Kontur</copyright>
     <dependencies>
       <group targetFramework=".NETStandard2.0">
-        <dependency id="Vostok.Logging.Abstractions" version="0.0.1" />
-        <dependency id="Vostok.Logging.Core" version="0.0.5" />
-        <dependency id="Vostok.Commons" version="0.0.1" />
+        <dependency id="Vostok.Logging.Abstractions" version="0.0.2" />
+        <dependency id="Vostok.Logging.Core" version="0.0.6" />
+        <dependency id="Vostok.Commons" version="0.0.5" />
         <dependency id="log4net" version="2.0.8" />
       </group>
     </dependencies>
