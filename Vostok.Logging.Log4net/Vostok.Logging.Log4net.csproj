@@ -18,10 +18,13 @@
     <PackageReference Include="log4net" Version="2.0.8" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Vostok.Logging.Abstractions\Vostok.Logging.Abstractions.csproj" />
     <ProjectReference Include="..\Vostok.Logging.Core\Vostok.Logging.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Vostok.Logging.Abstractions">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\vostok.logging.abstractions\Vostok.Logging.Abstractions\bin\Release\netstandard2.0\Vostok.Logging.Abstractions.dll</HintPath>
+    </Reference>
     <Reference Include="Vostok.Commons">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\vostok.commons\Vostok.Commons\bin\Release\netstandard2.0\Vostok.Commons.dll</HintPath>
