@@ -7,7 +7,6 @@ using System.Threading;
 using FluentAssertions;
 using NUnit.Framework;
 using Vostok.Logging.Abstractions;
-using Vostok.Logging.Context;
 using Vostok.Logging.Core.Configuration;
 using Vostok.Logging.FileLog;
 
@@ -146,7 +145,7 @@ namespace Vostok.Logging.Tests
             ReadAllLines(settings.FilePath).Should().BeEquivalentTo(messages[0], convertedSecondMessage);
         }
 
-        [Test]
+        /*[Test]
         public void FileLog_with_context()
         {
             var messages = new[] { "Hello, World 1", "Hello, World 2" };
@@ -188,7 +187,7 @@ namespace Vostok.Logging.Tests
             createdFiles.Add(settings.FilePath);
 
             ReadAllLines(settings.FilePath).Should().BeEquivalentTo($"[prefix1.1] {messages[0]}", $"[prefix2.2] Info 134 {messages[1]}");
-        }
+        }*/
 
         [SetUp]
         public void SetUp()
