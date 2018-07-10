@@ -21,7 +21,7 @@ namespace Vostok.Logging.Core.Configuration
             }
             catch (Exception exception)
             {
-                OnError(exception);
+                ErrorCallBack(exception);
                 return defaultSettings;
             }
         }
@@ -46,13 +46,13 @@ namespace Vostok.Logging.Core.Configuration
                 .WithDefaultParsers()
                 .WithCustomParser<ConversionPattern>(ConversionPattern.TryParse)
                 .WithCustomParser<Encoding>(EncodingParser.TryParse);
-            var configProviderSettings = new ConfigurationProviderSettings { Binder = binder, OnError = OnError };
+            var configProviderSettings = new ConfigurationProviderSettings { Binder = binder, ErrorCallBack = ErrorCallBack };
             return new ConfigurationProvider(configProviderSettings);
         }
 
         private static string AppConfigFileName => $"{AppDomain.CurrentDomain.FriendlyName}.config";
 
-        private static void OnError(Exception exception)
+        private static void ErrorCallBack(Exception exception)
         {
             Console.Out.WriteLine(exception);
         }
