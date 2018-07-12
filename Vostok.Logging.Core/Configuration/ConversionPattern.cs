@@ -34,22 +34,20 @@ namespace Vostok.Logging.Core.Configuration
         {
             object prefixProperty = null;
             @event.Properties?.TryGetValue(prefixPropertyName, out prefixProperty);
+            var prefixes = prefixProperty is ImmutableArray<string> array && !array.IsDefaultOrEmpty ? array.ToArray() : null;
             var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
             var properties = @event.Properties != null
                 ? string.Join(", ", @event.Properties.Values
                     .Select(p => (p as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? p.ToString()))
                 : null;
 
-            var timestampStr = $"{@event.Timestamp:HH:mm:ss zzz} ";
-            var levelStr = $"{@event.Level} ";
-            var prefixStr = prefixProperty == null ? null : $"[{prefixProperty}] ";
-            //var prefixStr = prefixProperty is ImmutableArray<string> prefixes 
-            //    ? $"{string.Join(" ", prefixes.Select(p => $"[{p}]"))} "
-            //    : null;
-            var messageStr = string.IsNullOrEmpty(message) ? null : $"{message} ";
-            var exceptionStr = @event.Exception == null ? null : $"{@event.Exception} ";
+            var timestampStr = @event.Timestamp.ToString("HH:mm:ss zzz");
+            var levelStr = @event.Level;
+            var prefixStr = prefixes == null ? null : string.Join(" ", prefixes.Select(p => $"[{p}]"));
+            var messageStr = string.IsNullOrEmpty(message) ? null : message;
+            var exceptionStr = @event.Exception;
             var newLine = Environment.NewLine;
-            var propertiesStr = string.IsNullOrEmpty(properties) ? null : $"{properties} ";
+            var propertiesStr = string.IsNullOrEmpty(properties) ? null : properties;
 
             var formattedLine = string.Format(formatString, timestampStr, levelStr, prefixStr, messageStr, exceptionStr, newLine, propertiesStr);
 
