@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -34,7 +33,7 @@ namespace Vostok.Logging.Core.Configuration
         {
             object prefixProperty = null;
             @event.Properties?.TryGetValue(prefixPropertyName, out prefixProperty);
-            var prefixes = prefixProperty is ImmutableArray<string> array && !array.IsDefaultOrEmpty ? array.ToArray() : null;
+            var prefixes = prefixProperty is IReadOnlyList<string> array ? array.ToArray() : null;
             var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
             var properties = @event.Properties != null
                 ? string.Join(", ", @event.Properties.Values
