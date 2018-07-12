@@ -13,7 +13,7 @@ namespace Vostok.Logging.ConsoleLog
     {
         static ConsoleLog()
         {
-            configProvider = new LogConfigProvider<ConsoleLogSettings>(configSectionName);
+            configProvider = new LogConfigProvider<ConsoleLogSettings>(new ConsoleLogSettings());
             isInitialized = new AtomicBoolean(false);
         }
 

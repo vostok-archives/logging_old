@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vostok.Commons.Conversions;
 using Vostok.Commons.Synchronization;
@@ -89,9 +90,12 @@ namespace Vostok.Logging.FileLog
 
         private static TextWriter CreateFileWriter(FileLogSettings settings)
         {
-            var fileName = settings.EnableRolling 
-                ? $"{settings.FilePath}{DateTimeOffset.UtcNow.Date:yyyy.MM.dd}" 
-                : settings.FilePath;
+            var fileName = settings.FilePath;
+            var fileNameContainsDatePattern = Regex.Matches(fileName, fileNameDatePattern).Count != 0;
+
+            fileName = !(settings.EnableRolling && !fileNameContainsDatePattern)
+                ? Regex.Replace(fileName, fileNameDatePattern, DateTimeOffset.UtcNow.Date.ToString("yyyy.MM.dd"))
+                : $"{fileName}{DateTimeOffset.UtcNow.Date:yyyy.MM.dd}";
 
             var fileMode = settings.AppendToFile 
                 ? FileMode.Append 
@@ -146,5 +150,6 @@ namespace Vostok.Logging.FileLog
         private static BoundedBuffer<LogEvent> eventsBuffer;
 
         private const string configSectionName = "fileLogConfig";
+        private const string fileNameDatePattern = "$(?:d|D)";
     }
 }

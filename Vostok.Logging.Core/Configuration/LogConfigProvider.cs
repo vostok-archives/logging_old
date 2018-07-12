@@ -43,9 +43,9 @@ namespace Vostok.Logging.Core.Configuration
         private static ConfigurationProvider GetConfiguredConfigProvider()
         {
             var binder = new DefaultSettingsBinder()
-                .WithDefaultParsers()
                 .WithCustomParser<ConversionPattern>(ConversionPattern.TryParse)
                 .WithCustomParser<Encoding>(EncodingParser.TryParse);
+
             var configProviderSettings = new ConfigurationProviderSettings { Binder = binder, ErrorCallBack = ErrorCallBack };
             return new ConfigurationProvider(configProviderSettings);
         }
