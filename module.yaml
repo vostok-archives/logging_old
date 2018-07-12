@@ -6,7 +6,7 @@ sdk *default:
       name: dotnet
 
   install:
-    - Vostok.Logging.Core/bin/Release/netstandard2.0/Merged/Vostok.Logging.Core.dll
+    - Vostok.Logging.Core/bin/Release/netstandard2.0/Vostok.Logging.Core.dll
     - Vostok.Logging.ConsoleLog/bin/Release/netstandard2.0/Vostok.Logging.ConsoleLog.dll
     - Vostok.Logging.FileLog/bin/Release/netstandard2.0/Vostok.Logging.FileLog.dll
     - Vostok.Logging.Log4net/bin/Release/netstandard2.0/Vostok.Logging.Log4net.dll
@@ -18,6 +18,8 @@ sdk *default:
     - vostok.configuration.abstractions@dev
 
 full-build > sdk:
+  deps:
+    - vostok.logging.context
   build:
     target: Vostok.Logging.sln
     configuration: Release
