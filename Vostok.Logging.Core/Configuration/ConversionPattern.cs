@@ -10,10 +10,6 @@ namespace Vostok.Logging.Core.Configuration
 {
     public class ConversionPattern
     {
-        private const int PrefixFormatNumber = 5;
-        private const string PrefixPropertyName = "prefix";
-        private readonly string prefixStringFormat = $"[{{{PrefixFormatNumber}}}]";
-
         public string PatternStr { get; }
 
         public static ConversionPattern FromString([CanBeNull] string patternStr)
@@ -31,27 +27,27 @@ namespace Vostok.Logging.Core.Configuration
             return true;
         }
 
-        public static ConversionPattern Default => new ConversionPattern(string.Join(" ", patternKeys.Keys.Select(k => $"{{{k}}}")), false);
+        public static ConversionPattern Default => new ConversionPattern(string.Join(string.Empty, patternKeys.Keys.Select(k => $"{{{k}}}")), false);
 
         public string Format([NotNull] LogEvent @event)
         {
-            var timestamp = @event.Timestamp.ToString("HH:mm:ss zzz");
-            var level = @event.Level;
-            var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
-            var exception = @event.Exception;
-            var newLine = Environment.NewLine;
-
             object prefix = null;
-            @event.Properties?.TryGetValue(PrefixPropertyName, out prefix);
-            if (prefix != null && !formatString.StartsWith(prefixStringFormat))
-                formatString = $"{prefixStringFormat} {formatString}";
-
-            var properties = @event.Properties != null 
+            @event.Properties?.TryGetValue(prefixPropertyName, out prefix);
+            var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
+            var properties = @event.Properties != null
                 ? string.Join(", ", @event.Properties.Values
                     .Select(p => (p as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? p.ToString()))
                 : null;
 
-            var formattedLine = string.Format(formatString, timestamp, level, message, exception, newLine, prefix, properties);
+            var timestampStr = $"{@event.Timestamp:HH:mm:ss zzz} ";
+            var levelStr = $"{@event.Level} ";
+            var prefixStr = prefix == null ? null : $"[{prefix}] ";
+            var messageStr = string.IsNullOrEmpty(message) ? null : $"{message} ";
+            var exceptionStr = @event.Exception == null ? null : $"{@event.Exception} ";
+            var newLine = Environment.NewLine;
+            var propertiesStr = string.IsNullOrEmpty(properties) ? null : $"{properties} ";
+
+            var formattedLine = string.Format(formatString, timestampStr, levelStr, prefixStr, messageStr, exceptionStr, newLine, propertiesStr);
 
             if (@event.Properties == null)
                 return formattedLine;
@@ -101,19 +97,20 @@ namespace Vostok.Logging.Core.Configuration
             return formatString.Equals(other.formatString, StringComparison.CurrentCultureIgnoreCase);
         }
 
-        private string formatString;
+        private readonly string formatString;
 
         private static readonly Dictionary<int, string> patternKeys = new Dictionary<int, string>
         {
             {0, "%(?:d|D)" },
             {1, "%(?:l|L)" },
-            {2, "%(?:m|M)" },
-            {3, "%(?:e|E)" },
-            {4, "%(?:n|N)" },
-            {/*5*/PrefixFormatNumber, "%(?:x|X)" }
+            {2, "%(?:x|X)" },
+            {3, "%(?:m|M)" },
+            {4, "%(?:e|E)" },
+            {5, "%(?:n|N)" }
         };
 
         private const string singlePropertyPattern = "%(?:p|P)\\((\\w*)\\)";
         private const string allPropertiesPattern = "%(?:p|P)(?!\\()";
+        private const string prefixPropertyName = "prefix";
     }
 }
