@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -33,7 +34,6 @@ namespace Vostok.Logging.Core.Configuration
         {
             object prefixProperty = null;
             @event.Properties?.TryGetValue(prefixPropertyName, out prefixProperty);
-            var prefixes = prefixProperty as string[];
             var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
             var properties = @event.Properties != null
                 ? string.Join(", ", @event.Properties.Values
@@ -42,7 +42,10 @@ namespace Vostok.Logging.Core.Configuration
 
             var timestampStr = $"{@event.Timestamp:HH:mm:ss zzz} ";
             var levelStr = $"{@event.Level} ";
-            var prefixStr = prefixes == null ? null : $"{string.Join(" ", prefixes.Select(p => $"[{p}]"))} ";
+            var prefixStr = prefixProperty == null ? null : $"[{prefixProperty}] ";
+            //var prefixStr = prefixProperty is ImmutableArray<string> prefixes 
+            //    ? $"{string.Join(" ", prefixes.Select(p => $"[{p}]"))} "
+            //    : null;
             var messageStr = string.IsNullOrEmpty(message) ? null : $"{message} ";
             var exceptionStr = @event.Exception == null ? null : $"{@event.Exception} ";
             var newLine = Environment.NewLine;
