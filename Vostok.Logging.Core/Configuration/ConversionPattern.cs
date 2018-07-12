@@ -31,8 +31,9 @@ namespace Vostok.Logging.Core.Configuration
 
         public string Format([NotNull] LogEvent @event)
         {
-            object prefix = null;
-            @event.Properties?.TryGetValue(prefixPropertyName, out prefix);
+            object prefixProperty = null;
+            @event.Properties?.TryGetValue(prefixPropertyName, out prefixProperty);
+            var prefixes = prefixProperty as string[];
             var message = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
             var properties = @event.Properties != null
                 ? string.Join(", ", @event.Properties.Values
@@ -41,7 +42,7 @@ namespace Vostok.Logging.Core.Configuration
 
             var timestampStr = $"{@event.Timestamp:HH:mm:ss zzz} ";
             var levelStr = $"{@event.Level} ";
-            var prefixStr = prefix == null ? null : $"[{prefix}] ";
+            var prefixStr = prefixes == null ? null : $"{string.Join(" ", prefixes.Select(p => $"[{p}]"))} ";
             var messageStr = string.IsNullOrEmpty(message) ? null : $"{message} ";
             var exceptionStr = @event.Exception == null ? null : $"{@event.Exception} ";
             var newLine = Environment.NewLine;
