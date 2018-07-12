@@ -13,8 +13,11 @@
     <PackageLicenseUrl>https://github.com/vostok/logging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/vostok/logging</PackageProjectUrl>
     <Description>Logging library for microservice toolkit http://vostok.tools/</Description>
+    <NuspecFile>Vostok.Configuration.nuspec</NuspecFile>
   </PropertyGroup>
+
   <ItemGroup>
+    <PackageReference Include="ILRepack" Version="2.0.15" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
   </ItemGroup>
 
@@ -35,4 +38,12 @@
       <HintPath>..\..\vostok.configuration.abstractions\Vostok.Configuration.Abstractions\bin\Release\netstandard2.0\Vostok.Configuration.Abstractions.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <Target Name="RepackAssemblies" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <MergeAssemblies Include="$(AssemblyName).dll" />
+      <MergeAssemblies Include="$(USERPROFILE)\.nuget\packages\system.collections.immutable\1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll" />
+    </ItemGroup>
+    <Exec WorkingDirectory="$(ProjectDir)$(OutputPath)" Command="$(ILRepack) /internalize /log:ilrepack.log /out:Merged\$(AssemblyName).dll @(MergeAssemblies, ' ')" />
+  </Target>
 </Project>
