@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
-using Vostok.Commons;
 using Vostok.Logging.Abstractions;
 
 namespace Vostok.Logging.Core.Configuration
@@ -29,34 +27,33 @@ namespace Vostok.Logging.Core.Configuration
 
         public static ConversionPattern Default = new ConversionPattern(string.Join(string.Empty, patternKeys.Keys.Select(k => $"{{{k}}}")));
 
-
-        private static string GetComponentValue(EventComponentsType type, LogEvent @event, string propertyName)
+        private static string GetComponentValue(TemplateComponentPart part, LogEvent @event)
         {
-            switch (type)
+            switch (part.Type)
             {
-                case EventComponentsType.DateTime:
+                case FormatPatternType.DateTime:
                     return @event.Timestamp.ToString("HH:mm:ss zzz");
 
-                case EventComponentsType.Level:
+                case FormatPatternType.Level:
                     return @event.Level.ToString();
 
-                case EventComponentsType.Prefix:
+                case FormatPatternType.Prefix:
                     var prefixProperty = GetPropertyOrNull(@event, prefixPropertyName);
                     return prefixProperty is IReadOnlyList<string> prefixes ? string.Join(" ", prefixes.Select(p => $"[{p.ToString()}]")): null;
 
-                case EventComponentsType.Message:
+                case FormatPatternType.Message:
                     return @event.MessageTemplate;
 
-                case EventComponentsType.Exception:
+                case FormatPatternType.Exception:
                     return @event.Exception?.ToString();
 
-                case EventComponentsType.Property:
-                    return GetPropertyOrNull(@event, propertyName)?.ToString();
+                case FormatPatternType.Property:
+                    return GetPropertyOrNull(@event, part.PropertyName)?.ToString();
 
-                case EventComponentsType.Properties:
+                case FormatPatternType.Properties:
                     return @event.Properties == null ? null : $"[properties: {string.Join(", ", @event.Properties.Select(p => $"{p.Key} = {p.Value.ToString()}"))}]";
 
-                case EventComponentsType.NewLine:
+                case FormatPatternType.NewLine:
                     return Environment.NewLine;
 
                 default:
@@ -66,17 +63,15 @@ namespace Vostok.Logging.Core.Configuration
 
         public string Format([NotNull] LogEvent @event)
         {
-            var builder = new StringBuilder(parts[0].type == EventComponentsType.StringStart ? parts[0].partSuffix : null);
+            var builder = new StringBuilder(parts[0].Type == FormatPatternType.StringStart ? parts[0].PartSuffix : null);
 
-            for (var i = 0; i < parts.Length; i++)
+            foreach (var part in parts)
             {
-                var componentType = parts[i].type;
-                var postStr = parts[i].partSuffix;
-                var value = GetComponentValue(componentType, @event, parts[i].propertyName);
+                var value = GetComponentValue(part, @event);
                 if (!string.IsNullOrEmpty(value))
                 {
                     builder.Append(value);
-                    builder.Append(postStr);
+                    builder.Append(part.PartSuffix);
                 }
             }
 
@@ -87,7 +82,7 @@ namespace Vostok.Logging.Core.Configuration
         {
             var anyKey = string.Join("|", patternKeys.Values);
             var matches = Regex.Matches(patternStr, $"(?:^?%(?:{anyKey})|^)((?:[^%]|%(?!{anyKey}))*)", RegexOptions.IgnoreCase);
-            parts = new (EventComponentsType type, string propertyName, string partSuffix)[matches.Count];
+            parts = new TemplateComponentPart[matches.Count];
 
             for (var i = 0; i < matches.Count; i++)
             {
@@ -96,28 +91,28 @@ namespace Vostok.Logging.Core.Configuration
             }
         }
 
-        private (EventComponentsType type, string propertyName, string partSuffix) TransformMatch(Match match)
+        private TemplateComponentPart TransformMatch(Match match)
         {
             var value = match.Value;
             var propertyName = match.Groups[1].Value;
             var suffix = match.Groups[2].Value;
 
             if (!value.StartsWith("%"))
-                return (EventComponentsType.StringStart, null, suffix);
+                return new TemplateComponentPart(FormatPatternType.StringStart, null, suffix);
 
-            foreach (var key in patternKeys.Keys.Where(k => k != EventComponentsType.Property))
+            foreach (var key in patternKeys.Keys.Where(k => k != FormatPatternType.Property))
             {
                 var pattern = $"%{patternKeys[key]}";
                 if (value.StartsWith(pattern, StringComparison.CurrentCultureIgnoreCase))
                 {
                     if (!string.IsNullOrEmpty(propertyName))
-                        return (EventComponentsType.Property, propertyName, suffix);
+                        return new TemplateComponentPart(FormatPatternType.Property, propertyName, suffix);
 
-                    return (key, null, suffix);
+                    return new TemplateComponentPart(key, null, suffix);
                 }
             }
 
-            return (EventComponentsType.StringStart, null, value);
+            return new TemplateComponentPart(FormatPatternType.StringStart, null, value);
         }
 
         public override int GetHashCode()
@@ -148,23 +143,23 @@ namespace Vostok.Logging.Core.Configuration
                 : null;
         }
 
-        private readonly (EventComponentsType type, string propertyName, string partSuffix)[] parts;
+        private readonly TemplateComponentPart[] parts;
 
-        private static readonly Dictionary<EventComponentsType, string> patternKeys = new Dictionary<EventComponentsType, string>
+        private static readonly Dictionary<FormatPatternType, string> patternKeys = new Dictionary<FormatPatternType, string>
         {
-            { EventComponentsType.DateTime, "d" },
-            { EventComponentsType.Level, "l" },
-            { EventComponentsType.Prefix, "x" },
-            { EventComponentsType.Message, "m" },
-            { EventComponentsType.Exception, "e" },
-            { EventComponentsType.Property, @"p\((\w*)\)" },
-            { EventComponentsType.Properties, "p" },
-            { EventComponentsType.NewLine, "n" }
+            { FormatPatternType.DateTime, "d" },
+            { FormatPatternType.Level, "l" },
+            { FormatPatternType.Prefix, "x" },
+            { FormatPatternType.Message, "m" },
+            { FormatPatternType.Exception, "e" },
+            { FormatPatternType.Property, @"p\((\w*)\)" },
+            { FormatPatternType.Properties, "p" },
+            { FormatPatternType.NewLine, "n" }
         };
 
         private const string prefixPropertyName = "prefix";
 
-        private enum EventComponentsType
+        private enum FormatPatternType
         {
             StringStart,
             DateTime,
@@ -175,6 +170,20 @@ namespace Vostok.Logging.Core.Configuration
             Properties,
             Property,
             NewLine
+        }
+
+        private class TemplateComponentPart
+        {
+            public FormatPatternType Type { get; }
+            public string PropertyName { get; }
+            public string PartSuffix { get; }
+
+            public TemplateComponentPart(FormatPatternType type, string propertyName, string suffix)
+            {
+                Type = type;
+                PropertyName = propertyName;
+                PartSuffix = suffix;
+            }
         }
     }
 }
