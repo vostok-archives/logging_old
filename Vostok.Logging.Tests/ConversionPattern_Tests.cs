@@ -11,11 +11,12 @@ namespace Vostok.Logging.Tests
     [TestFixture]
     internal class ConversionPattern_Tests
     {
+        [Test]
         public void Format_should_return_correct_string_for_default_pattern([Values] LogLevel level)
         {
             var pattern = ConversionPattern.Default;
             var exception = new Exception("AnyException");
-            var @event = new LogEvent(level, DateTimeOffset.UtcNow, null, exception).WithProperty("prop", "ccc");
+            var @event = new LogEvent(level, DateTimeOffset.UtcNow, "Hello, World", exception).WithProperty("prop", "ccc");
 
             var timestamp = @event.Timestamp.ToString("HH:mm:ss zzz");
             var formattedMessage = LogEventFormatter.FormatMessage(@event.MessageTemplate, @event.Properties);
@@ -41,6 +42,7 @@ namespace Vostok.Logging.Tests
             pattern.Format(@event).Should().Be($"{@event.Timestamp:HH:mm:ss zzz}");
         }
 
+        [Test]
         public void Format_should_return_correct_string_for_level_key_in_template([Values] LogLevel level)
         {
             var pattern = ConversionPattern.FromString("%l");
@@ -49,6 +51,7 @@ namespace Vostok.Logging.Tests
             pattern.Format(@event).Should().Be($"{level}");
         }
 
+        [Test]
         public void Format_should_return_correct_string_for_upper_cased_level_key_in_template([Values] LogLevel level)
         {
             var pattern = ConversionPattern.FromString("%L");
@@ -135,7 +138,7 @@ namespace Vostok.Logging.Tests
             var pattern = ConversionPattern.FromString("%p(prop)");
             var @event = GenerateEvent(new Dictionary<string, object> { { "other", "ccc" } });
 
-            pattern.Format(@event).Should().Be("%p(prop)");
+            pattern.Format(@event).Should().Be(string.Empty);
         }
 
         [Test]
@@ -144,7 +147,7 @@ namespace Vostok.Logging.Tests
             var pattern = ConversionPattern.FromString("%p");
             var @event = GenerateEvent(new Dictionary<string, object> { { "prop", "ccc" } });
 
-            pattern.Format(@event).Should().Be("ccc");
+            pattern.Format(@event).Should().Be("[properties: prop = ccc]");
         }
 
         [Test]
@@ -153,7 +156,7 @@ namespace Vostok.Logging.Tests
             var pattern = ConversionPattern.FromString("%P");
             var @event = GenerateEvent(new Dictionary<string, object> { { "prop", "ccc" } });
 
-            pattern.Format(@event).Should().Be("ccc");
+            pattern.Format(@event).Should().Be("[properties: prop = ccc]");
         }
 
         [Test]

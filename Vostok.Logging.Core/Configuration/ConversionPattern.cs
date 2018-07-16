@@ -63,6 +63,10 @@ namespace Vostok.Logging.Core.Configuration
             foreach (var part in patternParts.Where(p => p.Type != PatternPartType.StringStart))
             {
                 var partValue = GetPartValue(part, @event);
+
+                if (part.Type == PatternPartType.Message)
+                    partValue = LogEventFormatter.FormatMessage(partValue, @event.Properties);
+
                 if (!string.IsNullOrEmpty(partValue))
                 {
                     builder.Append(partValue);
