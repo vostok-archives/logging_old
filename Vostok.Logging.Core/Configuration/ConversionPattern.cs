@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -52,14 +53,19 @@ namespace Vostok.Logging.Core.Configuration
 
         public string Format([NotNull] LogEvent @event)
         {
-            var builder = new StringBuilder(patternParts[0].Type == PatternPartType.StringStart ? patternParts[0].PartSuffix : null);
+            if (patternParts.Length == 0)
+                return string.Empty;
 
-            foreach (var part in patternParts)
+            var builder = patternParts[0].Type == PatternPartType.StringStart
+                ? new StringBuilder(patternParts[0].PartSuffix, patternParts.Length * 10)
+                : new StringBuilder(patternParts.Length * 10);
+
+            foreach (var part in patternParts.Where(p => p.Type != PatternPartType.StringStart))
             {
-                var value = GetPartValue(part, @event);
-                if (!string.IsNullOrEmpty(value))
+                var partValue = GetPartValue(part, @event);
+                if (!string.IsNullOrEmpty(partValue))
                 {
-                    builder.Append(value);
+                    builder.Append(partValue);
                     builder.Append(part.PartSuffix);
                 }
             }
@@ -119,7 +125,7 @@ namespace Vostok.Logging.Core.Configuration
             if (property == null)
                 return null;
 
-            return property.ToString();
+            return (property as IFormattable)?.ToString(null, CultureInfo.CurrentCulture) ?? property.ToString();
         }
 
         private static string TryFormatProperties(IReadOnlyDictionary<string, object> properties)
@@ -153,22 +159,22 @@ namespace Vostok.Logging.Core.Configuration
 
         private static PatternPart CreatePatternPart(Match match)
         {
-            var value = match.Value;
+            var value = match.Groups[0].Value;
             var propertyName = match.Groups[1].Value;
             var suffix = match.Groups[2].Value;
 
             if (!value.StartsWith("%"))
                 return new PatternPart(PatternPartType.StringStart, null, suffix);
 
-            foreach (var key in patternKeys.Keys.Where(k => k != PatternPartType.Property))
+            foreach (var patternType in patternKeys.Keys.Where(k => k != PatternPartType.Property))
             {
-                var pattern = $"%{patternKeys[key]}";
-                if (value.StartsWith(pattern, StringComparison.CurrentCultureIgnoreCase))
+                var patternKey = $"%{patternKeys[patternType]}";
+                if (value.StartsWith(patternKey, StringComparison.CurrentCultureIgnoreCase))
                 {
                     if (!string.IsNullOrEmpty(propertyName))
                         return new PatternPart(PatternPartType.Property, propertyName, suffix);
 
-                    return new PatternPart(key, null, suffix);
+                    return new PatternPart(patternType, null, suffix);
                 }
             }
 
@@ -193,10 +199,10 @@ namespace Vostok.Logging.Core.Configuration
             return PatternStr.Equals(other.PatternStr, StringComparison.CurrentCultureIgnoreCase);
         }
 
-        private readonly PatternPart[] patternParts;
-
         private static readonly Dictionary<PatternPartType, string> patternKeys;
         private static readonly string regexPattern;
+
+        private readonly PatternPart[] patternParts;
 
         private const string dateTimeFormatString = "HH:mm:ss zzz";
         private const string prefixPropertyName = "prefix";
