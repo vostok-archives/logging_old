@@ -109,23 +109,19 @@ namespace Vostok.Logging.Tests
         [Test]
         public void FileLog_should_switch_notes_encoding_if_Encoding_was_updated()
         {
-            var messages = new[] { "Hello, World 1", "Hello, World 2" };
-
-            var secondMessageBytes = Encoding.UTF8.GetBytes($"{messages[1]}{Environment.NewLine}");
-            var convertedSecondMessageBytes = Encoding.Convert(Encoding.UTF8, Encoding.Unicode, secondMessageBytes);
-            var convertedSecondMessage = Encoding.UTF8.GetString(convertedSecondMessageBytes);
-
-            log.Info(messages[0]);
+            var messages = new[] { "Hello, World 1{0}", "Hello, World 2{0}" };
+            
+            log.Info(messages[0], "€®");
             WaitForOperationCanceled();
 
-            UpdateSettings(s => s.Encoding = Encoding.Unicode);
+            UpdateSettings(s => s.Encoding = Encoding.ASCII);
 
-            log.Info(messages[1]);
+            log.Info(messages[1], "€®");
             WaitForOperationCanceled();
 
             createdFiles.Add(settings.FilePath);
 
-            ReadAllLines(settings.FilePath).Should().BeEquivalentTo(messages[0], convertedSecondMessage);
+            ReadAllLines(settings.FilePath).Should().BeEquivalentTo(string.Format(messages[0], "€®"), string.Format(messages[1], "??"));
         }
 
         [Test]
@@ -155,7 +151,7 @@ namespace Vostok.Logging.Tests
         public void FileLog_with_subcontext()
         {
             var messages = new[] { "Hello, World 1", "Hello, World 2" };
-
+            
             UpdateSettings(s => s.ConversionPattern = ConversionPattern.FromString("%x %m%n"));
 
             var conLog = new ContextualPrefixedILogWrapper(log);
@@ -194,8 +190,7 @@ namespace Vostok.Logging.Tests
             WaitForOperationCanceled();
 
             createdFiles.Add(settings.FilePath);
-
-            ReadAllLines(settings.FilePath).Should().BeEquivalentTo($"[prefix] {messages[0]}", $"Info  134 {messages[1]}");
+            ReadAllLines(settings.FilePath).Should().BeEquivalentTo($"[prefix] {messages[0]}", $"Info 134 {messages[1]}");
         }
 
         [SetUp]

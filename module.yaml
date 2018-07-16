@@ -19,6 +19,7 @@ sdk *default:
 
 full-build > sdk:
   deps:
+    - vostok.context@dev
     - vostok.logging.context@dev
   build:
     target: Vostok.Logging.sln

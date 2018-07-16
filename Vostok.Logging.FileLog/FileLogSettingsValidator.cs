@@ -40,6 +40,10 @@ namespace Vostok.Logging.FileLog
             {
                 Path.GetFullPath(filePath);
             }
+            catch (ArgumentException exception)
+            {
+                return SettingsValidationResult.FilePathIsNotCorrect(filePath, exception);
+            }
             catch (NotSupportedException exception)
             {
                 return SettingsValidationResult.FilePathIsNotCorrect(filePath, exception);
