@@ -5,7 +5,6 @@ using Vostok.Commons.Conversions;
 using Vostok.Commons.Synchronization;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Core;
-using Vostok.Logging.Core.Configuration;
 
 namespace Vostok.Logging.ConsoleLog
 {
@@ -13,13 +12,19 @@ namespace Vostok.Logging.ConsoleLog
     {
         static ConsoleLog()
         {
-            configProvider = new LogConfigProvider<ConsoleLogSettings>(new ConsoleLogSettings());
+            Settings = new ConsoleLogSettings();
             isInitialized = new AtomicBoolean(false);
         }
 
         public static void Configure(ConsoleLogSettings settings)
         {
-            configProvider = new LogConfigProvider<ConsoleLogSettings>(settings);
+            var validationResult = new ConsoleLogSettingsValidator().TryValidate(settings);
+            if (!validationResult.IsSuccessful)
+            {
+                Console.Out.WriteLine(validationResult);
+                return;
+            }
+            Settings = settings;
         }
 
         public void Log(LogEvent @event)
@@ -42,7 +47,7 @@ namespace Vostok.Logging.ConsoleLog
             {
                 while (true)
                 {
-                    var settings = configProvider.Settings;
+                    var settings = Settings;
 
                     try
                     {
@@ -85,7 +90,7 @@ namespace Vostok.Logging.ConsoleLog
         {
             if (isInitialized.TrySetTrue())
             {
-                ReinitEventsQueue(configProvider.Settings);
+                ReinitEventsQueue(Settings);
                 StartNewLoggingThread();
             }
         }
@@ -107,11 +112,9 @@ namespace Vostok.Logging.ConsoleLog
 
         private static readonly AtomicBoolean isInitialized;
 
-        private static ILogConfigProvider<ConsoleLogSettings> configProvider;
+        private static ConsoleLogSettings Settings { get; set; }
 
         private static volatile LogEvent[] currentEventsBuffer;
         private static volatile BoundedBuffer<LogEvent> eventsBuffer;
-
-        private const string configSectionName = "consoleLogConfig";
     }
 }
