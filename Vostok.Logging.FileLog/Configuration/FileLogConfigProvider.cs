@@ -55,7 +55,7 @@ namespace Vostok.Logging.FileLog.Configuration
 
         private static void ErrorCallBack(Exception exception)
         {
-            Console.Out.WriteLine(exception);
+            Core.Console.TryOutToConsole(exception, true);
         }
 
         private readonly IConfigurationProvider configProvider;

@@ -21,7 +21,7 @@ namespace Vostok.Logging.ConsoleLog
             var validationResult = new ConsoleLogSettingsValidator().TryValidate(settings);
             if (!validationResult.IsSuccessful)
             {
-                Console.Out.WriteLine(validationResult);
+                Core.Console.TryOutToConsole(validationResult.ToString(), true);
                 return;
             }
             Settings = settings;
@@ -55,7 +55,7 @@ namespace Vostok.Logging.ConsoleLog
                     }
                     catch (Exception exception)
                     {
-                        Console.Out.WriteLine(exception);
+                        Core.Console.TryOutToConsole(exception, true);
                         await Task.Delay(300.Milliseconds());
                     }
 
@@ -81,7 +81,7 @@ namespace Vostok.Logging.ConsoleLog
                 var currentEvent = eventsToWrite[i];
                 using (new ConsoleColorChanger(levelToColor[currentEvent.Level]))
                 {
-                    Console.Out.Write(settings.ConversionPattern.Format(currentEvent));
+                    System.Console.Out.Write(settings.ConversionPattern.Format(currentEvent));
                 }
             }
         }

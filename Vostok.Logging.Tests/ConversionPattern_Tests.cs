@@ -228,7 +228,7 @@ namespace Vostok.Logging.Tests
 
 
         [Test]
-        public void Test()
+        public void Format_should_render_substrings_after_keys_if_event_has_such_properties()
         {
             var dateTime = DateTimeOffset.UtcNow;
             const LogLevel level = LogLevel.Info;
@@ -249,31 +249,38 @@ namespace Vostok.Logging.Tests
                 exception, 
                 string.Join(", ", properties.Select(p => $"{ p.Key} = { p.Value}")),
                 property);
+
             pattern.Format(@event).Should().Be(template);
         }
 
         [Test]
-        public void Test2()
+        public void Format_should_render_only_template_string_if_it_not_contains_any_keys()
         {
             var dateTime = DateTimeOffset.UtcNow;
-            const LogLevel level = LogLevel.Info;
-            const string prefix = null;
-            const string message = null;
+            const string prefix = "p";
+            const string message = "Hello, World";
             var exception = new Exception("AnyException");
             const string property = "value";
             var properties = new Dictionary<string, object> { { "prefix", new[] { prefix } }, { "prop", property } };
 
-            var pattern = ConversionPattern.FromString("a%da%la%xa%ma%ea%pa%p(prop)a%n");
+            var pattern = ConversionPattern.FromString("aaa");
 
             var @event = GenerateEvent(dateTime, message, exception, properties);
-            var template = string.Format("a{0:HH:mm:ss zzz}a{1}a[{2}]a{3}a{4}a[properties: {5}]a{6}a\r\n",
-                dateTime,
-                level,
-                prefix,
-                message,
-                exception,
-                string.Join(", ", properties.Select(p => $"{ p.Key} = { p.Value}")),
-                property);
+
+            pattern.Format(@event).Should().Be("aaa");
+        }
+
+        [Test]
+        public void Format_should_not_render_substrings_after_keys_if_event_has_not_such_properties()
+        {
+            var dateTime = DateTimeOffset.UtcNow;
+            const LogLevel level = LogLevel.Info;
+
+            var pattern = ConversionPattern.FromString("a%da%la%xa%ma%ea%pa%p(prop)a%n");
+
+            var @event = GenerateEvent(dateTime, null, null, null);
+
+            var template = string.Format("a{0:HH:mm:ss zzz}a{1}a\r\n", dateTime, level);
             pattern.Format(@event).Should().Be(template);
         }
 

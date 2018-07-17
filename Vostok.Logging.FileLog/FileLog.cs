@@ -65,7 +65,7 @@ namespace Vostok.Logging.FileLog
                     }
                     catch (Exception exception)
                     {
-                        Console.Out.WriteLine(exception);
+                        Core.Console.TryOutToConsole(exception);
                         await Task.Delay(300.Milliseconds());
                     }
 
