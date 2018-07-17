@@ -1,8 +1,6 @@
-﻿using Vostok.Configuration.Abstractions.Validation;
-
-namespace Vostok.Logging.Core
+﻿namespace Vostok.Logging.Core
 {
-    internal interface ILogSettingsValidator<in TSettings> : ISettingsValidator<TSettings>
+    internal interface ILogSettingsValidator<in TSettings>
     {
         SettingsValidationResult TryValidate(TSettings settings);
     }

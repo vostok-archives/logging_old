@@ -4,7 +4,8 @@ using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using Vostok.Logging.Abstractions;
-using Vostok.Logging.Core.Configuration;
+using Vostok.Logging.Core;
+// ReSharper disable UseStringInterpolation
 
 namespace Vostok.Logging.Tests
 {
@@ -224,6 +225,58 @@ namespace Vostok.Logging.Tests
             pattern.Format(@event).Should().Be(Environment.NewLine);
         }
 
+
+
+        [Test]
+        public void Test()
+        {
+            var dateTime = DateTimeOffset.UtcNow;
+            const LogLevel level = LogLevel.Info;
+            const string prefix = "p";
+            const string message = "Hello, World";
+            var exception = new Exception("AnyException");
+            const string property = "value";
+            var properties = new Dictionary<string, object> { { "prefix", new []{ prefix } } , { "prop", property }};
+
+            var pattern = ConversionPattern.FromString("a%da%la%xa%ma%ea%pa%p(prop)a%n");
+
+            var @event = GenerateEvent(dateTime, message, exception, properties);
+            var template = string.Format("a{0:HH:mm:ss zzz}a{1}a[{2}]a{3}a{4}a[properties: {5}]a{6}a\r\n",
+                dateTime, 
+                level,
+                prefix,
+                message,
+                exception, 
+                string.Join(", ", properties.Select(p => $"{ p.Key} = { p.Value}")),
+                property);
+            pattern.Format(@event).Should().Be(template);
+        }
+
+        [Test]
+        public void Test2()
+        {
+            var dateTime = DateTimeOffset.UtcNow;
+            const LogLevel level = LogLevel.Info;
+            const string prefix = null;
+            const string message = null;
+            var exception = new Exception("AnyException");
+            const string property = "value";
+            var properties = new Dictionary<string, object> { { "prefix", new[] { prefix } }, { "prop", property } };
+
+            var pattern = ConversionPattern.FromString("a%da%la%xa%ma%ea%pa%p(prop)a%n");
+
+            var @event = GenerateEvent(dateTime, message, exception, properties);
+            var template = string.Format("a{0:HH:mm:ss zzz}a{1}a[{2}]a{3}a{4}a[properties: {5}]a{6}a\r\n",
+                dateTime,
+                level,
+                prefix,
+                message,
+                exception,
+                string.Join(", ", properties.Select(p => $"{ p.Key} = { p.Value}")),
+                property);
+            pattern.Format(@event).Should().Be(template);
+        }
+
         private static LogEvent GenerateEvent(LogLevel level = LogLevel.Info)
         {
             return new LogEvent(level, DateTimeOffset.UtcNow, null);
@@ -242,6 +295,12 @@ namespace Vostok.Logging.Tests
         private static LogEvent GenerateEvent(string messageTemplate, IReadOnlyDictionary<string, object> properties = null)
         {
             var @event = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, messageTemplate);
+            return properties?.Aggregate(@event, (e, prop) => e.WithProperty(prop.Key, prop.Value)) ?? @event;
+        }
+
+        private static LogEvent GenerateEvent(DateTimeOffset timestamp, string messageTemplate, Exception exception, IReadOnlyDictionary<string, object> properties)
+        {
+            var @event = new LogEvent(LogLevel.Info, timestamp, messageTemplate, exception);
             return properties?.Aggregate(@event, (e, prop) => e.WithProperty(prop.Key, prop.Value)) ?? @event;
         }
     }

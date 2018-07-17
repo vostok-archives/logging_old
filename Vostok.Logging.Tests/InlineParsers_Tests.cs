@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using FluentAssertions;
 using NUnit.Framework;
-using Vostok.Logging.Core.Configuration.Parsing;
+using Vostok.Logging.Core.Parsing;
 
 namespace Vostok.Logging.Tests
 {

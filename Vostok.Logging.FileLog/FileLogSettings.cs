@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Vostok.Configuration.Abstractions;
-using Vostok.Logging.Core.Configuration;
+using Vostok.Logging.Core;
+using Vostok.Logging.FileLog.Configuration;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 

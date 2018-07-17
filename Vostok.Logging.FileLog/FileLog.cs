@@ -6,7 +6,7 @@ using Vostok.Commons.Conversions;
 using Vostok.Commons.Synchronization;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Core;
-using Vostok.Logging.Core.Configuration;
+using Vostok.Logging.FileLog.Configuration;
 
 namespace Vostok.Logging.FileLog
 {
@@ -14,13 +14,13 @@ namespace Vostok.Logging.FileLog
     {
         static FileLog()
         {
-            configProvider = new LogConfigProvider<FileLogSettings>(configSectionName);
+            configProvider = new FileLogConfigProvider<FileLogSettings>(configSectionName);
             isInitialized = new AtomicBoolean(false);
         }
 
         public static void Configure(FileLogSettings settings)
         {
-            configProvider = new LogConfigProvider<FileLogSettings>(settings);
+            configProvider = new FileLogConfigProvider<FileLogSettings>(settings);
         }
 
         public void Log(LogEvent @event)
@@ -81,7 +81,7 @@ namespace Vostok.Logging.FileLog
         {
             var newSettings = configProvider.Settings;
 
-            if (newSettings.Equals(settings))
+            if (ReferenceEquals(settings, newSettings))
                 return false;
 
             settings = newSettings;
@@ -144,7 +144,7 @@ namespace Vostok.Logging.FileLog
 
         private static readonly AtomicBoolean isInitialized;
 
-        private static ILogConfigProvider<FileLogSettings> configProvider;
+        private static IFileLogConfigProvider<FileLogSettings> configProvider;
 
         private static LogEvent[] currentEventsBuffer;
         private static BoundedBuffer<LogEvent> eventsBuffer;

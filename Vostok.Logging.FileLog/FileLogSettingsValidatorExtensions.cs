@@ -1,4 +1,5 @@
 ﻿using Vostok.Logging.Core;
+using Vostok.Logging.FileLog.Configuration;
 
 namespace Vostok.Logging.FileLog
 {

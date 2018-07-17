@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Vostok.Logging.Abstractions;
 
-namespace Vostok.Logging.Core.Configuration
+namespace Vostok.Logging.Core
 {
     public class ConversionPattern
     {

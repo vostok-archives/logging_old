@@ -5,11 +5,12 @@ using Vostok.Configuration.Abstractions;
 using Vostok.Configuration.Binders;
 using Vostok.Configuration.Extensions;
 using Vostok.Configuration.Sources;
-using Vostok.Logging.Core.Configuration.Parsing;
+using Vostok.Logging.Core;
+using Vostok.Logging.Core.Parsing;
 
-namespace Vostok.Logging.Core.Configuration
+namespace Vostok.Logging.FileLog.Configuration
 {
-    internal class LogConfigProvider<TSettings> : ILogConfigProvider<TSettings> where TSettings : new()
+    internal class FileLogConfigProvider<TSettings> : IFileLogConfigProvider<TSettings> where TSettings : new()
     {
         public TSettings Settings => TryGetSettings();
 
@@ -26,16 +27,16 @@ namespace Vostok.Logging.Core.Configuration
             }
         }
 
-        public LogConfigProvider(string fileName, string sectionName) : this(new XmlFileSource(fileName).ScopeTo(configurationTagName, sectionName)) { }
+        public FileLogConfigProvider(string fileName, string sectionName) : this(new XmlFileSource(fileName).ScopeTo(configurationTagName, sectionName)) { }
 
-        public LogConfigProvider(string sectionName) : this(AppConfigFileName, sectionName) { }
+        public FileLogConfigProvider(string sectionName) : this(AppConfigFileName, sectionName) { }
 
-        public LogConfigProvider(TSettings settings)
+        public FileLogConfigProvider(TSettings settings)
         {
             configProvider = GetConfiguredConfigProvider().SetManually(settings, true);
         }
 
-        private LogConfigProvider(IConfigurationSource settingsSource)
+        private FileLogConfigProvider(IConfigurationSource settingsSource)
         {
             configProvider = GetConfiguredConfigProvider().SetupSourceFor<TSettings>(settingsSource);
         }

@@ -8,7 +8,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Context;
-using Vostok.Logging.Core.Configuration;
+using Vostok.Logging.Core;
 using Vostok.Logging.FileLog;
 
 namespace Vostok.Logging.Tests

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Vostok.Logging.Core.Configuration.Parsing
+namespace Vostok.Logging.Core.Parsing
 {
     internal static class EncodingParser
     {
