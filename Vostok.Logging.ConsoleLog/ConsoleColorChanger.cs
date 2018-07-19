@@ -2,8 +2,10 @@
 
 namespace Vostok.Logging.ConsoleLog
 {
-    internal class ConsoleColorChanger : IDisposable
+    internal struct ConsoleColorChanger : IDisposable
     {
+        private readonly ConsoleColor oldColor;
+
         public ConsoleColorChanger(ConsoleColor newColor)
         {
             oldColor = Console.ForegroundColor;
@@ -14,7 +16,5 @@ namespace Vostok.Logging.ConsoleLog
         {
             Console.ForegroundColor = oldColor;
         }
-
-        private readonly ConsoleColor oldColor;
     }
 }

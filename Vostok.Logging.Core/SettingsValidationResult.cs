@@ -5,19 +5,32 @@ namespace Vostok.Logging.Core
 {
     internal class SettingsValidationResult
     {
-        public bool IsSuccessful => type == ValidationResultType.Success;
+        private enum ValidationResultType
+        {
+            NotSupportedSettingsType,
+            EncodingIsNull,
+            ConversionPatternIsNull,
+            CapacityIsLessThanZero,
+            FilePathIsNullOrEmpty,
+            FilePathIsNotCorrect,
+            Success
+        }
 
         public static SettingsValidationResult NotSupportedSettingsType(Type settingsType)
         {
-            return new SettingsValidationResult(ValidationResultType.NotSupportedSettingsType, new
-            {
-                SettingsType = settingsType
-            });
+            return new SettingsValidationResult(
+                ValidationResultType.NotSupportedSettingsType,
+                new
+                {
+                    SettingsType = settingsType
+                });
         }
+
         public static SettingsValidationResult EncodingIsNull()
         {
             return new SettingsValidationResult(ValidationResultType.EncodingIsNull);
         }
+
         public static SettingsValidationResult ConversionPatternIsNull()
         {
             return new SettingsValidationResult(ValidationResultType.ConversionPatternIsNull);
@@ -35,11 +48,13 @@ namespace Vostok.Logging.Core
 
         public static SettingsValidationResult FilePathIsNotCorrect(string filePath, Exception exception)
         {
-            return new SettingsValidationResult(ValidationResultType.FilePathIsNotCorrect, new
-            {
-                FilePath = filePath,
-                Exception = exception
-            });
+            return new SettingsValidationResult(
+                ValidationResultType.FilePathIsNotCorrect,
+                new
+                {
+                    FilePath = filePath,
+                    Exception = exception
+                });
         }
 
         public static SettingsValidationResult Success()
@@ -47,19 +62,16 @@ namespace Vostok.Logging.Core
             return new SettingsValidationResult(ValidationResultType.Success);
         }
 
+        private readonly ValidationResultType type;
+        private readonly object properties;
+
         private SettingsValidationResult(ValidationResultType type, object properties = null)
         {
             this.type = type;
             this.properties = properties;
         }
 
-        public void EnsureSuccess()
-        {
-            if (IsSuccessful)
-                return;
-
-            throw new SettingsValidationFailedException(this);
-        }
+        public bool IsSuccessful => type == ValidationResultType.Success;
 
         public override string ToString()
         {
@@ -68,26 +80,6 @@ namespace Vostok.Logging.Core
 
             var propertiesStr = string.Join(", ", properties.GetType().GetProperties().Select(p => $"{p.Name}={p.GetValue(properties)}"));
             return $"{type}: {{{propertiesStr}}}";
-
-        }
-
-        private readonly ValidationResultType type;
-        private readonly object properties;
-
-        private enum ValidationResultType
-        {
-            NotSupportedSettingsType,
-            EncodingIsNull,
-            ConversionPatternIsNull,
-            CapacityIsLessThanZero,
-            FilePathIsNullOrEmpty,
-            FilePathIsNotCorrect,
-            Success
-        }
-
-        private class SettingsValidationFailedException : Exception
-        {
-            public SettingsValidationFailedException(SettingsValidationResult result) : base($"Settings validation failed: {{{result}}}") { }
         }
     }
 }

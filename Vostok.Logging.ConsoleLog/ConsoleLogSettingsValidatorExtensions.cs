@@ -4,11 +4,11 @@ namespace Vostok.Logging.ConsoleLog
 {
     internal static class ConsoleLogSettingsValidatorExtensions
     {
+        private static readonly ConsoleLogSettingsValidator validator = new ConsoleLogSettingsValidator();
+
         public static SettingsValidationResult Validate(this ConsoleLogSettings settings)
         {
             return validator.TryValidate(settings);
         }
-
-        private static readonly ConsoleLogSettingsValidator validator = new ConsoleLogSettingsValidator();
     }
 }

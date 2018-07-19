@@ -3,15 +3,23 @@ using System.Threading.Tasks;
 
 namespace Vostok.Logging.Core
 {
-    internal class BoundedBuffer<T> where T : class
+    internal class BoundedBuffer<T>
+        where T : class
     {
-        public int Count => itemsCount;
+        private readonly T[] items;
+
+        private TaskCompletionSource<bool> canDrainAsync;
+        private int itemsCount;
+        private int frontPtr;
+        private volatile int backPtr;
 
         public BoundedBuffer(int capacity)
         {
             items = new T[capacity];
             canDrainAsync = new TaskCompletionSource<bool>();
         }
+
+        public int Count => itemsCount;
 
         public bool TryAdd(T item)
         {
@@ -27,7 +35,7 @@ namespace Vostok.Logging.Core
                     {
                         var currentFrontPtr = frontPtr;
 
-                        if (Interlocked.CompareExchange(ref frontPtr, (currentFrontPtr + 1)%items.Length, currentFrontPtr) == currentFrontPtr)
+                        if (Interlocked.CompareExchange(ref frontPtr, (currentFrontPtr + 1) % items.Length, currentFrontPtr) == currentFrontPtr)
                         {
                             items[currentFrontPtr] = item;
                             if (currentCount == 0)
@@ -47,7 +55,7 @@ namespace Vostok.Logging.Core
             if (itemsCount == 0)
                 return 0;
 
-            canDrainAsync = new TaskCompletionSource<bool>();
+            canDrainAsync = new TaskCompletionSource<bool>(); // TODO(krait): check correctness
 
             var resultCount = 0;
 
@@ -72,11 +80,5 @@ namespace Vostok.Logging.Core
         {
             return canDrainAsync.Task;
         }
-
-        private TaskCompletionSource<bool> canDrainAsync;
-        private readonly T[] items;
-        private int itemsCount;
-        private int frontPtr;
-        private volatile int backPtr;
     }
 }

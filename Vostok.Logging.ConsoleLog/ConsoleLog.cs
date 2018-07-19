@@ -5,26 +5,44 @@ using Vostok.Commons.Conversions;
 using Vostok.Commons.Synchronization;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Core;
+using Console = Vostok.Logging.Core.Console;
 
 namespace Vostok.Logging.ConsoleLog
 {
     public class ConsoleLog : ILog
     {
+        private static readonly Dictionary<LogLevel, ConsoleColor> levelToColor = new Dictionary<LogLevel, ConsoleColor>
+        {
+            {LogLevel.Debug, ConsoleColor.Gray},
+            {LogLevel.Info, ConsoleColor.White},
+            {LogLevel.Warn, ConsoleColor.Yellow},
+            {LogLevel.Error, ConsoleColor.Red},
+            {LogLevel.Fatal, ConsoleColor.Red}
+        };
+
+        private static readonly AtomicBoolean isInitialized;
+
+        private static volatile LogEvent[] currentEventsBuffer;
+        private static volatile BoundedBuffer<LogEvent> eventsBuffer;
+
+        private static ConsoleLogSettings settings;
+
         static ConsoleLog()
         {
-            Settings = new ConsoleLogSettings();
+            settings = new ConsoleLogSettings();
             isInitialized = new AtomicBoolean(false);
         }
 
-        public static void Configure(ConsoleLogSettings settings)
+        public static void Configure(ConsoleLogSettings newSettings)
         {
-            var validationResult = new ConsoleLogSettingsValidator().TryValidate(settings);
+            var validationResult = new ConsoleLogSettingsValidator().TryValidate(newSettings);
             if (!validationResult.IsSuccessful)
             {
-                Core.Console.TryOutToConsole(validationResult.ToString(), true);
+                Console.TryWriteLine(validationResult);
                 return;
             }
-            Settings = settings;
+
+            settings = newSettings;
         }
 
         public void Log(LogEvent @event)
@@ -39,41 +57,43 @@ namespace Vostok.Logging.ConsoleLog
         }
 
         public bool IsEnabledFor(LogLevel level) => true;
+
         public ILog ForContext(string context) => this;
 
-        private static void StartNewLoggingThread()
+        private static void StartLoggingTask()
         {
-            Task.Run(async () => 
-            {
-                while (true)
+            Task.Run(
+                async () =>
                 {
-                    var settings = Settings;
+                    while (true)
+                    {
+                        var currentSettings = settings;
 
-                    try
-                    {
-                        WriteEventsToConsole(settings);
-                    }
-                    catch (Exception exception)
-                    {
-                        Core.Console.TryOutToConsole(exception, true);
-                        await Task.Delay(300.Milliseconds());
-                    }
+                        try
+                        {
+                            WriteEventsToConsole(currentSettings);
+                        }
+                        catch (Exception exception)
+                        {
+                            Console.TryWriteLine(exception);
+                            await Task.Delay(300.Milliseconds());
+                        }
 
-                    if (eventsBuffer.Count == 0)
-                    {
-                        await eventsBuffer.WaitForNewItemsAsync();
+                        if (eventsBuffer.Count == 0)
+                        {
+                            await eventsBuffer.WaitForNewItemsAsync();
+                        }
                     }
-                }
-            });
+                });
         }
 
-        private static void WriteEventsToConsole(ConsoleLogSettings settings)
+        private static void WriteEventsToConsole(ConsoleLogSettings currentSettings)
         {
             var buffer = eventsBuffer;
             var eventsToWrite = currentEventsBuffer;
 
-            if (settings.EventsQueueCapacity != currentEventsBuffer.Length)
-                ReinitEventsQueue(settings);
+            if (currentSettings.EventsQueueCapacity != currentEventsBuffer.Length)
+                ReinitEventsQueue(currentSettings);
 
             var eventsCount = buffer.Drain(eventsToWrite, 0, eventsToWrite.Length);
             for (var i = 0; i < eventsCount; i++)
@@ -81,7 +101,7 @@ namespace Vostok.Logging.ConsoleLog
                 var currentEvent = eventsToWrite[i];
                 using (new ConsoleColorChanger(levelToColor[currentEvent.Level]))
                 {
-                    System.Console.Out.Write(settings.ConversionPattern.Format(currentEvent));
+                    Console.TryWrite(currentSettings.ConversionPattern.Format(currentEvent));
                 }
             }
         }
@@ -90,31 +110,15 @@ namespace Vostok.Logging.ConsoleLog
         {
             if (isInitialized.TrySetTrue())
             {
-                ReinitEventsQueue(Settings);
-                StartNewLoggingThread();
+                ReinitEventsQueue(settings);
+                StartLoggingTask();
             }
         }
 
-        private static void ReinitEventsQueue(ConsoleLogSettings settings)
+        private static void ReinitEventsQueue(ConsoleLogSettings newSettings)
         {
-            currentEventsBuffer = new LogEvent[settings.EventsQueueCapacity];
-            eventsBuffer = new BoundedBuffer<LogEvent>(settings.EventsQueueCapacity);
+            currentEventsBuffer = new LogEvent[newSettings.EventsQueueCapacity];
+            eventsBuffer = new BoundedBuffer<LogEvent>(newSettings.EventsQueueCapacity);
         }
-
-        private static readonly Dictionary<LogLevel, ConsoleColor> levelToColor = new Dictionary<LogLevel, ConsoleColor>
-        {
-            {LogLevel.Debug, ConsoleColor.Gray},
-            {LogLevel.Info, ConsoleColor.White},
-            {LogLevel.Warn, ConsoleColor.Yellow},
-            {LogLevel.Error, ConsoleColor.Red},
-            {LogLevel.Fatal, ConsoleColor.Red}
-        };
-
-        private static readonly AtomicBoolean isInitialized;
-
-        private static ConsoleLogSettings Settings { get; set; }
-
-        private static volatile LogEvent[] currentEventsBuffer;
-        private static volatile BoundedBuffer<LogEvent> eventsBuffer;
     }
 }

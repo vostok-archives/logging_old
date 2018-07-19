@@ -7,29 +7,27 @@ using Vostok.Configuration.Extensions;
 using Vostok.Configuration.Sources;
 using Vostok.Logging.Core;
 using Vostok.Logging.Core.Parsing;
+using Console = Vostok.Logging.Core.Console;
 
 namespace Vostok.Logging.FileLog.Configuration
 {
-    internal class FileLogConfigProvider<TSettings> : IFileLogConfigProvider<TSettings> where TSettings : new()
+    internal class FileLogConfigProvider<TSettings> : IFileLogConfigProvider<TSettings>
+        where TSettings : new()
     {
-        public TSettings Settings => TryGetSettings();
+        private const string configurationTagName = "configuration";
 
-        private TSettings TryGetSettings()
+        private readonly IConfigurationProvider configProvider;
+        private readonly TSettings defaultSettings = new TSettings();
+
+        public FileLogConfigProvider(string fileName, string sectionName)
+            : this(new XmlFileSource(fileName).ScopeTo(configurationTagName, sectionName))
         {
-            try
-            {
-                return configProvider.Get<TSettings>();
-            }
-            catch (Exception exception)
-            {
-                ErrorCallBack(exception);
-                return defaultSettings;
-            }
         }
 
-        public FileLogConfigProvider(string fileName, string sectionName) : this(new XmlFileSource(fileName).ScopeTo(configurationTagName, sectionName)) { }
-
-        public FileLogConfigProvider(string sectionName) : this(AppConfigFileName, sectionName) { }
+        public FileLogConfigProvider(string sectionName)
+            : this(AppConfigFileName, sectionName)
+        {
+        }
 
         public FileLogConfigProvider(TSettings settings)
         {
@@ -41,25 +39,36 @@ namespace Vostok.Logging.FileLog.Configuration
             configProvider = GetConfiguredConfigProvider().SetupSourceFor<TSettings>(settingsSource);
         }
 
+        public TSettings Settings => TryGetSettings();
+
+        private static string AppConfigFileName => $"{AppDomain.CurrentDomain.FriendlyName}.config";
+
+        private TSettings TryGetSettings()
+        {
+            try
+            {
+                return configProvider.Get<TSettings>();
+            }
+            catch (Exception exception)
+            {
+                ErrorCallback(exception);
+                return defaultSettings;
+            }
+        }
+
         private static ConfigurationProvider GetConfiguredConfigProvider()
         {
             var binder = new DefaultSettingsBinder()
                 .WithCustomParser<ConversionPattern>(ConversionPattern.TryParse)
                 .WithCustomParser<Encoding>(EncodingParser.TryParse);
 
-            var configProviderSettings = new ConfigurationProviderSettings { Binder = binder, ErrorCallBack = ErrorCallBack };
+            var configProviderSettings = new ConfigurationProviderSettings {Binder = binder, ErrorCallBack = ErrorCallback};
             return new ConfigurationProvider(configProviderSettings);
         }
 
-        private static string AppConfigFileName => $"{AppDomain.CurrentDomain.FriendlyName}.config";
-
-        private static void ErrorCallBack(Exception exception)
+        private static void ErrorCallback(Exception exception)
         {
-            Core.Console.TryOutToConsole(exception, true);
+            Console.TryWriteLine(exception);
         }
-
-        private readonly IConfigurationProvider configProvider;
-        private readonly TSettings defaultSettings = new TSettings();
-        private const string configurationTagName = "configuration";
     }
 }

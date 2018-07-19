@@ -21,8 +21,12 @@ namespace Vostok.Logging.Log4net
 
         public void Log(LogEvent @event)
         {
+            if (@event == null)
+                return;
+
             if (!IsEnabledFor(@event.Level))
                 return;
+
             logger.Log(Log4netHelpers.TranslateEvent(logger, @event));
         }
 

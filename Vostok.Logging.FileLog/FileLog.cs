@@ -12,6 +12,16 @@ namespace Vostok.Logging.FileLog
 {
     public class FileLog : ILog
     {
+        private const string configSectionName = "fileLogConfig";
+        private const string fileNameDatePattern = "$(?:d|D)";
+
+        private static readonly AtomicBoolean isInitialized;
+
+        private static IFileLogConfigProvider<FileLogSettings> configProvider;
+
+        private static LogEvent[] currentEventsBuffer;
+        private static BoundedBuffer<LogEvent> eventsBuffer;
+
         static FileLog()
         {
             configProvider = new FileLogConfigProvider<FileLogSettings>(configSectionName);
@@ -28,7 +38,7 @@ namespace Vostok.Logging.FileLog
             if (@event == null)
                 return;
 
-            if(!isInitialized)
+            if (!isInitialized)
                 Initialize();
 
             eventsBuffer.TryAdd(@event);
@@ -38,43 +48,44 @@ namespace Vostok.Logging.FileLog
 
         public ILog ForContext(string context) => this;
 
-        private static void StartNewLoggingThread()
+        private static void StartLoggingTask()
         {
-            Task.Run(async () =>
-            {
-                var startDate = DateTimeOffset.UtcNow.Date;
-                var settings = configProvider.Settings;
-                var writer = CreateFileWriter(settings);
-
-                while (true)
+            Task.Run(
+                async () =>
                 {
-                    var settingsWereUpdated = TryUpdateSettings(ref settings);
+                    var startDate = DateTimeOffset.UtcNow.Date;
+                    var settings = configProvider.Settings;
+                    var writer = CreateFileWriter(settings);
 
-                    try
+                    while (true)
                     {
-                        var currentDate = DateTimeOffset.UtcNow.Date;
+                        var settingsWereUpdated = TryUpdateSettings(ref settings);
 
-                        if (settingsWereUpdated || settings.EnableRolling && currentDate > startDate)
+                        try
                         {
-                            writer.Close();
-                            writer = CreateFileWriter(settings);
-                            startDate = currentDate;
+                            var currentDate = DateTimeOffset.UtcNow.Date;
+
+                            if (settingsWereUpdated || settings.EnableRolling && currentDate > startDate)
+                            {
+                                writer.Close();
+                                writer = CreateFileWriter(settings);
+                                startDate = currentDate;
+                            }
+
+                            WriteEventsToFile(writer, settings);
+                        }
+                        catch (Exception exception)
+                        {
+                            Core.Console.TryWriteLine(exception);
+                            await Task.Delay(300.Milliseconds());
                         }
 
-                        WriteEventsToFile(writer, settings);
+                        if (eventsBuffer.Count == 0)
+                        {
+                            await eventsBuffer.WaitForNewItemsAsync();
+                        }
                     }
-                    catch (Exception exception)
-                    {
-                        Core.Console.TryOutToConsole(exception);
-                        await Task.Delay(300.Milliseconds());
-                    }
-
-                    if (eventsBuffer.Count == 0)
-                    {
-                        await eventsBuffer.WaitForNewItemsAsync();
-                    }
-                }
-            });
+                });
         }
 
         private static bool TryUpdateSettings(ref FileLogSettings settings)
@@ -97,8 +108,8 @@ namespace Vostok.Logging.FileLog
                 ? Regex.Replace(fileName, fileNameDatePattern, DateTimeOffset.UtcNow.Date.ToString("yyyy.MM.dd"))
                 : $"{fileName}{DateTimeOffset.UtcNow.Date:yyyy.MM.dd}";
 
-            var fileMode = settings.AppendToFile 
-                ? FileMode.Append 
+            var fileMode = settings.AppendToFile
+                ? FileMode.Append
                 : FileMode.OpenOrCreate;
 
             var directory = Path.GetDirectoryName(fileName);
@@ -124,6 +135,7 @@ namespace Vostok.Logging.FileLog
                 var currentEvent = eventsToWrite[i];
                 writer.Write(settings.ConversionPattern.Format(currentEvent));
             }
+
             writer.Flush();
         }
 
@@ -132,7 +144,7 @@ namespace Vostok.Logging.FileLog
             if (isInitialized.TrySetTrue())
             {
                 ReinitEventsQueue(configProvider.Settings);
-                StartNewLoggingThread();
+                StartLoggingTask();
             }
         }
 
@@ -141,15 +153,5 @@ namespace Vostok.Logging.FileLog
             currentEventsBuffer = new LogEvent[settings.EventsQueueCapacity];
             eventsBuffer = new BoundedBuffer<LogEvent>(settings.EventsQueueCapacity);
         }
-
-        private static readonly AtomicBoolean isInitialized;
-
-        private static IFileLogConfigProvider<FileLogSettings> configProvider;
-
-        private static LogEvent[] currentEventsBuffer;
-        private static BoundedBuffer<LogEvent> eventsBuffer;
-
-        private const string configSectionName = "fileLogConfig";
-        private const string fileNameDatePattern = "$(?:d|D)";
     }
 }

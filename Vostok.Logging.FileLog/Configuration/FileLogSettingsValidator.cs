@@ -2,6 +2,7 @@
 using System.IO;
 using Vostok.Configuration.Abstractions.Validation;
 using Vostok.Logging.Core;
+
 // ReSharper disable ReturnValueOfPureMethodIsNotUsed
 
 namespace Vostok.Logging.FileLog.Configuration

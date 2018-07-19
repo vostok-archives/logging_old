@@ -1,9 +1,11 @@
-﻿namespace Vostok.Logging.Core.Parsing
+﻿namespace Vostok.Logging.Tests
 {
     internal delegate bool TryParseDelegate<T>(string value, out T result);
 
     internal class InlineParser<T> : IInlineParser
     {
+        private readonly TryParseDelegate<T> tryParse;
+
         public InlineParser(TryParseDelegate<T> tryParse)
         {
             this.tryParse = tryParse;
@@ -21,7 +23,5 @@
 
             return false;
         }
-
-        private readonly TryParseDelegate<T> tryParse;
     }
 }

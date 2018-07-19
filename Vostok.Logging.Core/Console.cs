@@ -1,27 +1,39 @@
-﻿using System;
-
-namespace Vostok.Logging.Core
+﻿namespace Vostok.Logging.Core
 {
     internal static class Console
     {
-        public static void TryOutToConsole(string message, bool writeLine = false)
+        public static void TryWriteLine(string message)
         {
             try
             {
-                if (writeLine)
-                    System.Console.Out.WriteLine(message);
-                else
-                    System.Console.Out.Write(message);
+                System.Console.Out.WriteLine(message);
             }
-            catch (Exception)
+            catch
             {
                 // ignored
             }
         }
 
-        public static void TryOutToConsole(Exception exception, bool writeLine = false)
+        public static void TryWriteLine(object obj)
         {
-            TryOutToConsole(exception.ToString(), writeLine);
+            TryWriteLine(obj?.ToString());
+        }
+
+        public static void TryWrite(string message)
+        {
+            try
+            {
+                System.Console.Out.Write(message);
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
+        public static void TryWrite(object obj)
+        {
+            TryWrite(obj?.ToString());
         }
     }
 }

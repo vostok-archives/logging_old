@@ -9,7 +9,7 @@ namespace Vostok.Logging.ConsoleLog
             if (settings?.ConversionPattern == null)
                 return SettingsValidationResult.ConversionPatternIsNull();
 
-            if(settings.EventsQueueCapacity <= 0)
+            if (settings.EventsQueueCapacity <= 0)
                 return SettingsValidationResult.CapacityIsLessThanZero();
 
             return SettingsValidationResult.Success();

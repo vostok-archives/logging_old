@@ -1,4 +1,4 @@
-﻿namespace Vostok.Logging.Core.Parsing
+﻿namespace Vostok.Logging.Tests
 {
     internal interface IInlineParser
     {
